@@ -61,7 +61,7 @@ key_dict_no_rate = [
  '注视加工',
  '坯料加工',
  '精密制作',
- '专心加工',
+ # '专心加工',
  '俭约加工',
  # '工匠的神速技巧',
  '坚信',
@@ -82,11 +82,11 @@ key_dict_no_rate = [
  '秘诀'
  ]
 
-key_dict = key_dict_no_rate
+key_dict = key_dict_no_rate# + ['掌握'] * 8
 
 key_count = len(key_dict)
 macro_length = 15
-level = 80
+level = 67
 double_mapping = 2
 single_mapping = 2
 
@@ -192,8 +192,8 @@ if __name__ == '__main__':
         assert pop
     except:
         pop = gen_population()
-    #pop = gen_population()
-    goal = (1265.5251141552512, 5325.375939849624, 70, 507)
+    goal = ffprod.get_goal_by_data(168, 331, 1919, 10755, 80, 401)
+    #goal = (1265.5251141552512, 5325.375939849624, 70, 507)
     for _ in tqdm(range(1000)):
         ev = eval_population(pop, goal)
         print(ev[0][1], np.mean([x[1] for x in ev[:100]]))

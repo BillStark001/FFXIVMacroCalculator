@@ -110,6 +110,10 @@ def eval_seq(sim):
     return ans1, ans2
 
 def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25, 0.1]):
+    
+    if opr == None:
+        return False, [[total_rate, state]]
+    
     N, P, Q, E, Z, I, H, L = state
     GP, GQ, GE, GZ = goal
     L = dict(L)
@@ -147,7 +151,6 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     if 'quality_200p_su' in L: q_rate *= 2
     if 'process_150p' in L: p_rate *= 1.5
     if 'quality_150p' in L: q_rate *= 1.5
-    if 'process_200p_su' in L: p_rate *= 2
     if 'endurance_50p' in L: e_rate *= 0.5
     
     q_rate *= inner_static_rate[I]
@@ -181,7 +184,7 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     
     if not ('no_work_time' in opr['sp_eff']):  
         N = N + 1
-        for l in L: 
+        for l in list(L.keys()): 
             L[l] -= 1
             if L[l] == 0:
                 del L[l]
@@ -190,11 +193,18 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
             
     L_ = dict(L)
 
-    if 'process_200p_su' in L and opr['d_process'] > 0:
+    if 'process_200p_su' in L_ and opr['d_process'] > 0:
         del L_['process_200p_su']
         
-    if 'quality_200p_su' in L and opr['d_quality'] > 0:
+    if 'quality_200p_su' in L_ and opr['d_quality'] > 0:
         del L_['quality_200p_su']
+        
+    # add effects
+    
+    for eff in opr['timed_eff']:
+        oe = opr['timed_eff'][eff]
+        if oe > 0:
+            L_[eff] = oe
         
     anss = [[(1 - s_rate) * total_rate, (N, P, Q, E, Z, I, H, L)], [s_rate * total_rate, (N, P_, Q_, E_, Z_, I_, H, L_)]]
     
@@ -218,37 +228,55 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     # update L by operation
     return flag, ansss
 
+def get_goal_by_data(ep, eq, pp, qq, e, z):
+    p = 100 * pp / ep
+    q = 100 * qq / eq
+    return (p, q, e, z)
 
-
-if __name__ == "__main__":
-    s = init_state()
-    goal = (1265.5251141552512, 5325.375939849624, 70, 507)
-    mk = get_opr('制作', oprs)
-    hrd = [0, 0.75, 0.25, 0]
-    ss = [(1, s)]
-    sss = ss
-        
-    m1 = ['坚信', '内静', '改革', '加工', '加工', '加工', '加工', '阔步', '精修', '改革', '中级加工', '中级加工', '阔步', '比尔格的祝福', '制作']
-    m1 = 
-    ['闲静',
- '坯料制作',
- '加工',
- '坯料制作',
- '精修',
- '精修',
- '俭约加工',
- '俭约加工',
- '专心加工',
- '俭约加工',
- '精修',
- '比尔格的祝福',
- '坯料制作',
- '坯料制作',
- '坯料制作']
-
+def eval_on_average(m1, goal):
+    sss = [(1, init_state())]
+    print ('技能 [制作进度 加工进度 耐久 制作力]')
+    mult = np.array([1, 1, -1, -1])
+    diff = np.array([0, 0, goal[2], goal[3]])
     m2 = [get_opr(x, oprs) for x in m1]
     for m in m2:
         sss = simulate_seq(m, sss, goal, max_count=1000)#, hq_rate_dict=hrd)
-        print(eval_seq(sss)[1])#, eval_seq(sss)[0])
+        print(m['name'], (eval_seq(sss)[1]+0.3).astype(int)*mult+diff)
+    print (f'条件 {np.array(goal)}')
+
+def output(m):
+    ans = ''
+    for s in m:
+        ans += f'/ac "{s}" <wait.3>\n'
+    return ans
+
+if __name__ == "__main__":
+    
+    #goal = (1265.5251141552512, 5325.375939849624, 70, 507)
+    goal = get_goal_by_data(168, 331, 1919, 10755, 80, 401)
+    mk = get_opr('制作', oprs)
+    hrd = [0, 0.75, 0.25, 0]
+        
+    m1 = ['坚信', '内静', '改革', '加工', '加工', '加工', '加工', '阔步', '精修', '改革', '中级加工', '中级加工', '阔步', '比尔格的祝福', '制作']
+    m1 = ['坚信',
+ '崇敬',
+ '内静',
+ '模范制作',
+ '俭约加工',
+ '模范制作',
+ '俭约加工',
+ '俭约加工',
+ '俭约加工',
+ '改革',
+ '俭约加工',
+ '俭约加工',
+ '阔步',
+ '比尔格的祝福',
+ '模范制作']
+    
+    print(output(m1))
+    eval_on_average(m1, goal)
+
+    
                 
     
