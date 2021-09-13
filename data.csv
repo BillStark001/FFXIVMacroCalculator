@@ -19,7 +19,7 @@ name,least_level,d_process,d_quality,success_rate,d_force,d_endurance,d_inner_st
 工匠的神速技巧,80,0,1048576,1,250,10,0,only_first,,,,,,,,,
 坚信,54,300,0,1,6,10,0,only_first,,,5,,,,,,
 闲静,69,0,100,1,24,10,3,only_first;add_inner_static,,,,,,,,,
-元素之印记,37,100,0,1,6,10,0,,,,,,,,,,
+元素之印记,37,100,0,1,6,10,0,element_mark_applied,,,,,,,,,
 比尔格的祝福,50,0,100,1,24,10,0,d_quality_add_20_by_inner_static;only_when_inner_static;reset_inner_static,,,,,,,,,
 俭约,15,0,0,1,56,0,0,,4,,,,,,,,
 长期俭约,48,0,0,1,98,0,0,,8,,,,,,,,

@@ -156,6 +156,9 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     q_rate *= inner_static_rate[I]
     q_rate *= hq_dict[H]
     
+    if 'element_mark' in L: 
+        if 'element_mark_applied' in opr['sp_eff']: p_rate += 2 * max(1 - P / GP, 0)
+    
     if 'eff_50p_if_not_enough_endurance' in opr['sp_eff']:
         if opr['d_endurance'] * e_rate + E > GE: p_rate *= 0.5
         
