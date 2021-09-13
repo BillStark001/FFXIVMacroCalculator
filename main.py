@@ -130,7 +130,7 @@ def reproduce_agent(a1, a2, kc=key_count, mr=mutation_rate):
     mask = np.random.choice(3, size=len(a1), p=[(1-mr2)/2, (1-mr2)/2, mr2])
     a = [a1, a2]
     ans = [a[mask[i]][i] if mask[i] < 2 else np.random.randint(kc) for i in range(len(a1))]
-    mask2 = np.random.choice(2, size=len(a1), p=[1-mr2 / 2, mr2 / 2])
+    mask2 = np.random.choice(2, size=len(a1), p=[1-mr2, mr2])
     for i in range(len(a1) - 1, -1, -1):
         if mask2[i] == 1:
             mask3 = np.random.randint(4)
@@ -148,6 +148,12 @@ def reproduce_agent(a1, a2, kc=key_count, mr=mutation_rate):
                 del ans[0]
             else:
                 raise Exception("WTF")
+    mask3 = np.random.choice(2, size=len(a1) - 1, p=[1-mr2, mr2])
+    for i in range(len(a1) - 1):
+        if mask3[i] == 1:
+            x = ans[i]
+            ans[i] = ans[i+1]
+            ans[i+1] = x
     return ans
     
 
@@ -187,12 +193,14 @@ def select_and_regen(pop_eval, tp=total_population, sp=select_population, mr=mut
     return ans
     pass
 
+gshxd = lambda x = 0: (ffprod.eval_on_average(quick_repr(ev[x]), goal) or print(ffprod.output(quick_repr(ev[x]))))
+
 if __name__ == '__main__':
     try:
         assert pop
     except:
         pop = gen_population()
-    goal = ffprod.get_goal_by_data(168, 331, 1919, 10755, 80, 401)
+    goal = ffprod.get_goal_by_data(236, 362, 1808, 10389, 80, 401)
     #goal = (1265.5251141552512, 5325.375939849624, 70, 507)
     for _ in tqdm(range(1000)):
         ev = eval_population(pop, goal)

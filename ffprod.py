@@ -147,10 +147,10 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     if 'd_quality_add_20_by_inner_static' in opr['sp_eff'] and I > 0:
         q_rate += 0.2 * (I - 1)
     
-    if 'process_200p_su' in L: p_rate *= 2
-    if 'quality_200p_su' in L: q_rate *= 2
-    if 'process_150p' in L: p_rate *= 1.5
-    if 'quality_150p' in L: q_rate *= 1.5
+    if 'process_200p_su' in L: p_rate += 1
+    if 'quality_200p_su' in L: q_rate += 1
+    if 'process_150p' in L: p_rate += 0.5
+    if 'quality_150p' in L: q_rate += 0.5
     if 'endurance_50p' in L: e_rate *= 0.5
     
     q_rate *= inner_static_rate[I]
@@ -163,13 +163,20 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     if 'succ_to_100_if_after_observation' in opr['sp_eff']:
         if 'after_observation' in L: s_rate = 1
     
+    df = opr['d_force']
+    if 'force_to_18_after_processing' in opr['sp_eff']:
+        if 'after_processing' in L: df = 18
+    
     # execute current operation
     
     P_ = P + opr['d_process'] * p_rate
     Q_ = Q + opr['d_quality'] * q_rate
     E_ = E + opr['d_endurance'] * s_rate
-    Z_ = Z + opr['d_force']
+    Z_ = Z + df
     I_ = I + opr['d_inner_static'] if I > 0 or 'add_inner_static' in opr['sp_eff'] else 0
+    
+    if 'endurance_add5' in L:
+        E_ += 5
     
     if 'reset_inner_static' in opr['sp_eff']:
         I_ = 0
