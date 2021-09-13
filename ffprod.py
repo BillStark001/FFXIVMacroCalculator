@@ -1,0 +1,254 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Sep 13 01:53:48 2021
+
+@author: zhaoj
+"""
+
+import numpy as np
+import pandas as pd
+
+from collections import defaultdict
+
+'''
+state:
+    (N, P, Q, E, Z, I, H, L)
+    N: work time
+    P: process rate
+    Q: quality
+    E: endurance
+    Z: production force
+    I: inner static
+    H: current quality 0=low, 1=normal, 2=high, 3=highest
+    L: dict of additive effects
+'''
+
+def read_data(path):
+    c1 = pd.read_csv(open(path, 'r', encoding="gbk"))
+    c2 = []
+    for i in range(len(c1)):
+        c = c1.loc[i]
+        d = {}
+        t = {}
+        for k in c1.columns:
+            if k in key_whitelist:
+                d[k] = c[k]
+            else:
+                t[k] = int(c[k]) if not np.isnan(c[k]) else 0
+        if isinstance(d['sp_eff'], float) and np.isnan(d['sp_eff']):
+            d['sp_eff'] = []
+        else:
+            d['sp_eff'] = d['sp_eff'].split(';')
+        d['timed_eff'] = t
+        c2.append(d)
+    return c2
+
+def get_opr(name, oprs, level=80):
+    ans = None
+    for o in oprs:
+        if o['least_level'] > level:
+            continue
+        elif o['name'] == name:
+            if ans == None or ans['least_level'] < level:
+                ans = o
+    return ans
+
+inner_static_rate = [
+ 1.0, 
+ 1.0, 
+ 1.2388804146556174,
+ 1.4932383207358164,
+ 1.7631515041131651,
+ 2.0476428983395563,
+ 2.3481392101508662,
+ 2.6622366663631123,
+ 2.9923390401602767,
+ 3.3379966912545913,
+ 3.698682193485718,
+ 4.074395546853657]
+
+key_whitelist = [
+    'name', 
+    'least_level', 
+    'd_process', 
+    'd_quality', 
+    'success_rate', 
+    'd_force', 
+    'd_endurance', 
+    'd_inner_static', 
+    'sp_eff']
+
+oprs = read_data('data.csv')
+
+init_state = lambda: (0, 0, 0, 0, 0, 0, 1, {})
+
+hq_dict = [0.5, 1, 1.5, 2.5]
+
+def simulate_seq(opr, seq, goal, max_count=1000, hq_rate_dict = [0, 0.65, 0.25, 0.1]):
+    ans = []
+    for r, state in seq:
+        ans += simulate_state(opr, state, goal, r, hq_rate_dict)[1]
+        if len(ans) > max_count:
+            p = np.array([x[0] for x in ans])
+            p /= np.sum(p)
+            ans_ = np.random.choice(len(ans), size=max_count, p=p)
+            ans__ = defaultdict(int)
+            for aid in ans_:
+                ans__[aid] += 1 / max_count
+            ans = [[ans__[x], ans[x][1]] for x in ans__]
+            #ans = sorted(ans, key=lambda x: x[0], reverse=True) # by probability
+            #ans = ans[:max_count]
+    return ans
+
+def eval_seq(sim):
+    ans1 = 0
+    ans2 = np.zeros((4, ), dtype=float)
+    for res in sim:
+        ans1 += res[0]
+        ans2 += res[0] * np.array(res[1][1: 5], dtype=float)
+    ans2 /= ans1
+    return ans1, ans2
+
+def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25, 0.1]):
+    N, P, Q, E, Z, I, H, L = state
+    GP, GQ, GE, GZ = goal
+    L = dict(L)
+    
+    # judge if operation is legal
+    
+    flag = True
+    if 'only_first' in opr['sp_eff'] and N > 0: flag = False
+    if 'hq_only' in opr['sp_eff'] and H < 2: flag = False
+    if 'element_mark_appended' in opr['sp_eff'] and 'element_mark_appended' in L: flag = False
+    if 'not_in_frugal' in opr['sp_eff'] and 'endurance_50p' in L: flag = False
+    if 'only_when_inner_static' in opr['sp_eff'] and I == 0: flag = False
+    if 'add_inner_static' in opr['sp_eff'] and I > 0: flag = False
+    
+    # judge if the state is halting
+    flag2 = True
+    if E >= GE: flag2 = False
+    if P >= GP: flag2 = False
+    if Z + opr['d_force'] > GZ: flag2 = False
+    
+    flag = flag and flag2
+    
+    if not flag:
+        return flag, [[total_rate, state]]
+    
+    # calculate p q e s
+    p_rate = 1
+    q_rate = 1
+    e_rate = 1
+    
+    if 'd_quality_add_20_by_inner_static' in opr['sp_eff'] and I > 0:
+        q_rate += 0.2 * (I - 1)
+    
+    if 'process_200p_su' in L: p_rate *= 2
+    if 'quality_200p_su' in L: q_rate *= 2
+    if 'process_150p' in L: p_rate *= 1.5
+    if 'quality_150p' in L: q_rate *= 1.5
+    if 'process_200p_su' in L: p_rate *= 2
+    if 'endurance_50p' in L: e_rate *= 0.5
+    
+    q_rate *= inner_static_rate[I]
+    q_rate *= hq_dict[H]
+    
+    if 'eff_50p_if_not_enough_endurance' in opr['sp_eff']:
+        if opr['d_endurance'] * e_rate + E > GE: p_rate *= 0.5
+        
+    s_rate = opr['success_rate']
+    if 'succ_to_100_if_after_observation' in opr['sp_eff']:
+        if 'after_observation' in L: s_rate = 1
+    
+    # execute current operation
+    
+    P_ = P + opr['d_process'] * p_rate
+    Q_ = Q + opr['d_quality'] * q_rate
+    E_ = E + opr['d_endurance'] * s_rate
+    Z_ = Z + opr['d_force']
+    I_ = I + opr['d_inner_static'] if I > 0 or 'add_inner_static' in opr['sp_eff'] else 0
+    
+    if 'reset_inner_static' in opr['sp_eff']:
+        I_ = 0
+    if 'div_inner_static' in opr['sp_eff']:
+        I_ = I * 2
+        I = int(I / 2) + 1
+        
+    # if I > 11: I = 11
+    if I_ > 11: I_ = 11
+    if E_ < 0: E_ = 0
+    if Z_ < 0: Z_ = 0
+    
+    if not ('no_work_time' in opr['sp_eff']):  
+        N = N + 1
+        for l in L: 
+            L[l] -= 1
+            if L[l] == 0:
+                del L[l]
+            elif L[l] < 0:
+                raise Exception("damn")
+            
+    L_ = dict(L)
+
+    if 'process_200p_su' in L and opr['d_process'] > 0:
+        del L_['process_200p_su']
+        
+    if 'quality_200p_su' in L and opr['d_quality'] > 0:
+        del L_['quality_200p_su']
+        
+    anss = [[(1 - s_rate) * total_rate, (N, P, Q, E, Z, I, H, L)], [s_rate * total_rate, (N, P_, Q_, E_, Z_, I_, H, L_)]]
+    
+    # divide H
+    
+    ansss = []
+    for ans in anss:
+        a, b = ans
+        if a <= 0: continue
+        n, p, q, e, z, i, h, l = b
+            
+        if h == 3: 
+            ansss.append([a, (n, p, q, e, z, i, 0, l)])
+        # doubtful
+        # elif h == 0: h = 1
+        else: 
+            for h_, hr in zip([0, 1, 2, 3], hq_rate_dict):
+                if hr <= 0: continue
+                ansss.append([a * hr, (n, p, q, e, z, i, h_, l)])
+    
+    # update L by operation
+    return flag, ansss
+
+
+
+if __name__ == "__main__":
+    s = init_state()
+    goal = (1265.5251141552512, 5325.375939849624, 70, 507)
+    mk = get_opr('制作', oprs)
+    hrd = [0, 0.75, 0.25, 0]
+    ss = [(1, s)]
+    sss = ss
+        
+    m1 = ['坚信', '内静', '改革', '加工', '加工', '加工', '加工', '阔步', '精修', '改革', '中级加工', '中级加工', '阔步', '比尔格的祝福', '制作']
+    m1 = 
+    ['闲静',
+ '坯料制作',
+ '加工',
+ '坯料制作',
+ '精修',
+ '精修',
+ '俭约加工',
+ '俭约加工',
+ '专心加工',
+ '俭约加工',
+ '精修',
+ '比尔格的祝福',
+ '坯料制作',
+ '坯料制作',
+ '坯料制作']
+
+    m2 = [get_opr(x, oprs) for x in m1]
+    for m in m2:
+        sss = simulate_seq(m, sss, goal, max_count=1000)#, hq_rate_dict=hrd)
+        print(eval_seq(sss)[1])#, eval_seq(sss)[0])
+                
+    
