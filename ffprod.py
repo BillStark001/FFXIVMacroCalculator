@@ -2,7 +2,7 @@
 """
 Created on Mon Sep 13 01:53:48 2021
 
-@author: zhaoj
+@author: billstark001
 """
 
 import numpy as np
@@ -186,8 +186,8 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     Z = Z + df
     I_ = I + opr['d_inner_static'] if I > 0 or 'add_inner_static' in opr['sp_eff'] else 0
     
-    if 'endurance_add5' in L:
-        E -= 5
+    if 'endurance_add5' in L and not ('no_work_time' in opr['sp_eff']):
+        if E < GE: E -= 5
     
     if 'reset_inner_static' in opr['sp_eff']:
         I_ = 0
@@ -199,7 +199,6 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
         
     # if I > 11: I = 11
     if I_ > 11: I_ = 11
-    if E < 0: E = 0
     if Z < 0: Z = 0
     
     if not ('no_work_time' in opr['sp_eff']):  

@@ -2,13 +2,12 @@
 """
 Created on Mon Sep 13 01:53:48 2021
 
-@author: zhaoj
+@author: billstark001
 """
 
-#import tensorflow as tf
 import numpy as np
-import scipy
 import ffprod
+import random
 
 from tqdm import tqdm
 
@@ -90,9 +89,10 @@ level = 80
 double_mapping = 2
 single_mapping = 2
 
-mutation_rate = 0.3
-total_population = 1000
-select_population = 150
+mutation_rate = 0.4
+total_population = 1500
+select_population = int(total_population * 0.15)
+preserve_population = int(total_population * 0.25)
 
 hq_rate = [0, 1, 0, 0] # no hq at all to ease the simulation
 
@@ -107,8 +107,8 @@ def sigmoid(x0=0, y0=0, dy=1, k0=0.25):
 
 def get_loss(p, q, e, z):
     lp1 = sigmoid(p*0.75, 0, 1.5, 1.5/p)
-    lp2 = sigmoid(p*1.75, 0, 1.5, -1.5/p)
-    lp = lambda x: lp1(x)*lp1(x)*lp1(x)*lp2(x)*0.5
+    lpup = lp1(p*1.05)**3
+    lp = lambda x: min(lp1(x)**3 / lpup, 1) * 1.2
     lq_ = sigmoid(q*0.8, 0, 0.7, 5/q)
     lq = lambda x: 0.3 * x / q + lq_(x)
     le_ = sigmoid(e+7.5, 0, 1, -1/7.5)
@@ -184,13 +184,21 @@ def eval_population(pop, goal, hq_rate=hq_rate):
     d.sort(key=lambda x: x[1], reverse=True)
     return d
 
-def select_and_regen(pop_eval, tp=total_population, sp=select_population, mr=mutation_rate):
+def select_and_regen(pop_eval, 
+                     tp=total_population, 
+                     sp=select_population, 
+                     pp=preserve_population, 
+                     mr=mutation_rate):
     pop_eval.sort(key=lambda x: x[1], reverse=True)
-    pop_eval = pop_eval[:sp]
-    ans = [x[0] for x in pop_eval]
-    for _ in range(tp-sp):
-        a1 = pop_eval[np.random.randint(sp)][0]
-        a2 = pop_eval[np.random.randint(sp)][0]
+    pop_eval_s = pop_eval[:sp]
+    pop_eval_p = pop_eval[sp:]
+    random.shuffle(pop_eval[sp:])
+    pop_eval_p = pop_eval_p[:pp]
+    ans = [x[0] for x in pop_eval_s + pop_eval_p]
+    psp = pop_eval_s + pop_eval_p
+    for _ in range(tp-sp-pp):
+        a1 = psp[np.random.randint(sp+pp)][0]
+        a2 = psp[np.random.randint(sp+pp)][0]
         a3 = reproduce_agent(a1, a2, mr=mr)
         if isinstance(a3, float):
             print(a1, a2)
@@ -217,7 +225,11 @@ if __name__ == '__main__':
     #goal = ffprod.get_goal_by_data(442, 537, 5543, 28331, 70, 522) # 前言礼裙
     goal = ffprod.get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
     for it in range(100000):
-        ev = eval_population(pop, goal)
-        print(f'Iteration #{it}: best={ev[0][1]}, mean_of_top={np.mean([x[1] for x in ev[:100]])}')
-        pop = select_and_regen(ev)
+        try:
+            ev = eval_population(pop, goal)
+            print(f'Iteration #{it}: best={ev[0][1]}, mean_of_top={np.mean([x[1] for x in ev[:100]])}')
+            pop = select_and_regen(ev)
+        except KeyboardInterrupt:
+            gshxd()
+            break
         
