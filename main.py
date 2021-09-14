@@ -226,8 +226,8 @@ if __name__ == '__main__':
     except:
         pop = gen_population()
     #goal = ffprod.get_goal_by_data(585, 631, 2214, 32860, 60, 415) # 伊修加德70
-    goal = ffprod.get_goal_by_data(442, 537, 5543, 28331, 70, 522) # 前言礼裙
-    #goal = ffprod.get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
+    #goal = ffprod.get_goal_by_data(442, 537, 5543, 28331, 70, 522) # 前言礼裙
+    goal = ffprod.get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
     for it in range(100000):
         try:
             ev = eval_population(pop, goal)

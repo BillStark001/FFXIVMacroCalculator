@@ -268,9 +268,10 @@ def calculate_base_effect(d_level, cm, ct, suggested_cm, suggested_ct) :
     else:
         ldf_cm = ldf_ct = 1    
     
-    ans_cm = int((ldf_cm * (0.21 * cm + 2) * (10000 + cm)) / (10000 + suggested_cm))
-    ans_ct = int((ldf_ct * (0.35 * ct + 35) * (10000 + ct)) / (10000 + suggested_ct))
+    ans_cm = int((ldf_cm * int(0.21 * cm + 2) * int(10000 + cm)) / int(10000 + suggested_cm))
+    ans_ct = int((ldf_ct * int(0.35 * ct + 35) * int(10000 + ct)) / int(10000 + suggested_ct))
     
+    # ep, eq
     return ans_cm, ans_ct
 
 
