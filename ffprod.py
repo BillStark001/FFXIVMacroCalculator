@@ -86,19 +86,27 @@ hq_dict = [0.5, 1, 1.5, 2.5]
 
 def simulate_seq(opr, seq, goal, max_count=1000, hq_rate_dict = [0, 0.65, 0.25, 0.1]):
     ans = []
-    for r, state in seq:
-        ans += simulate_state(opr, state, goal, r, hq_rate_dict)[1]
+    failed_opr = 0
+    for i, (r, state) in enumerate(seq):
+        sim_succ, sim_res = simulate_state(opr, state, goal, r, hq_rate_dict)
+        ans += sim_res
+        if not sim_succ:
+            failed_opr += 1
         if len(ans) > max_count:
             p = np.array([x[0] for x in ans])
             p /= np.sum(p)
-            ans_ = np.random.choice(len(ans), size=max_count, p=p)
+            #ans_ = np.random.choice(len(ans), size=max_count, p=p)
             ans__ = defaultdict(int)
-            for aid in ans_:
-                ans__[aid] += 1 / max_count
-            ans = [[ans__[x], ans[x][1]] for x in ans__]
+            selected_count = 0
+            while len(ans__) < max_count and selected_count < 4:
+                aid = np.random.choice(len(ans), size=max_count * 2, p=p)
+                for a in aid: ans__[a] += 1
+                selected_count += 1
+            ans = [[ans__[x] / (selected_count * max_count * 2), ans[x][1]] for x in ans__]
             #ans = sorted(ans, key=lambda x: x[0], reverse=True) # by probability
             #ans = ans[:max_count]
-    return ans
+    failed_rate = failed_opr / len(seq)
+    return ans, failed_rate
 
 def eval_seq(sim):
     ans1 = 0
@@ -151,7 +159,7 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     if 'quality_200p_su' in L: q_rate += 1
     if 'process_150p' in L: p_rate += 0.5
     if 'quality_150p' in L: q_rate += 0.5
-    if 'endurance_50p' in L: e_rate *= 0.5
+    if 'endurance_50p' in L: e_rate -= 0.5
     
     q_rate *= inner_static_rate[I]
     q_rate *= hq_dict[H]
@@ -174,12 +182,12 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     
     P_ = P + opr['d_process'] * p_rate
     Q_ = Q + opr['d_quality'] * q_rate
-    E_ = E + opr['d_endurance'] * s_rate
-    Z_ = Z + df
+    E = E + opr['d_endurance'] * e_rate
+    Z = Z + df
     I_ = I + opr['d_inner_static'] if I > 0 or 'add_inner_static' in opr['sp_eff'] else 0
     
     if 'endurance_add5' in L:
-        E_ += 5
+        E -= 5
     
     if 'reset_inner_static' in opr['sp_eff']:
         I_ = 0
@@ -187,10 +195,12 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
         I_ = I * 2
         I = int(I / 2) + 1
         
+    
+        
     # if I > 11: I = 11
     if I_ > 11: I_ = 11
-    if E_ < 0: E_ = 0
-    if Z_ < 0: Z_ = 0
+    if E < 0: E = 0
+    if Z < 0: Z = 0
     
     if not ('no_work_time' in opr['sp_eff']):  
         N = N + 1
@@ -202,6 +212,10 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
                 raise Exception("damn")
             
     L_ = dict(L)
+
+    if 'do_not_complete' in L_ and P_ > GP: 
+        P_ = GP - 1
+        del L_['do_not_complete']
 
     if 'process_200p_su' in L_ and opr['d_process'] > 0:
         del L_['process_200p_su']
@@ -216,7 +230,7 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
         if oe > 0:
             L_[eff] = oe
         
-    anss = [[(1 - s_rate) * total_rate, (N, P, Q, E, Z, I, H, L)], [s_rate * total_rate, (N, P_, Q_, E_, Z_, I_, H, L_)]]
+    anss = [[(1 - s_rate) * total_rate, (N, P, Q, E, Z, I, H, L)], [s_rate * total_rate, (N, P_, Q_, E, Z, I_, H, L_)]]
     
     # divide H
     
@@ -243,49 +257,58 @@ def get_goal_by_data(ep, eq, pp, qq, e, z):
     q = 100 * qq / eq
     return (p, q, e, z)
 
-def eval_on_average(m1, goal):
+def eval_on_average(m1, goal, hq_rate_dict=hq_dict):
     sss = [(1, init_state())]
-    print ('技能 [制作进度 加工进度 耐久 制作力]')
+    print ('# 技能 [制作进度 加工进度 耐久 制作力] 失败率 样本数')
     mult = np.array([1, 1, -1, -1])
     diff = np.array([0, 0, goal[2], goal[3]])
     m2 = [get_opr(x, oprs) for x in m1]
-    for m in m2:
-        sss = simulate_seq(m, sss, goal, max_count=1000)#, hq_rate_dict=hrd)
-        print(m['name'], (eval_seq(sss)[1]+0.3).astype(int)*mult+diff)
+    for i in range(len(m2)):
+        m = m2[i]
+        sss, fr = simulate_seq(m, sss, goal, max_count=1000, hq_rate_dict=hq_rate_dict)
+        print(i + 1, m['name'], (np.around(eval_seq(sss)[1], decimals=3)*mult+diff), fr, len(sss))
     print (f'条件 {np.array(goal)}')
 
 def output(m):
+    if len(m) > 15:
+        ans = []
+        anss = ''
+        for i in range(len(m)):
+            if i % 14 == 0 and i > 0:
+                anss += f'/e "Macro {int(i / 14)} Completed."'
+                ans.append(anss)
+                anss = ''
+            anss += f'/ac "{m[i]}" <wait.3>\n'
+        anss += f'/e "Macro {len(ans) + 1} Completed."'
+        ans.append(anss)
+        return ans
     ans = ''
     for s in m:
         ans += f'/ac "{s}" <wait.3>\n'
-    return ans
+    return [ans[:-1]]
 
 if __name__ == "__main__":
     
     #goal = (1265.5251141552512, 5325.375939849624, 70, 507)
-    goal = get_goal_by_data(168, 331, 1919, 10755, 80, 401)
+    goal = get_goal_by_data(168, 331, 1919, 10755, 80, 4001)
     mk = get_opr('制作', oprs)
-    hrd = [0, 0.75, 0.25, 0]
+    hrd = [0, 1, 0, 0]
         
     m1 = ['坚信', '内静', '改革', '加工', '加工', '加工', '加工', '阔步', '精修', '改革', '中级加工', '中级加工', '阔步', '比尔格的祝福', '制作']
-    m1 = ['坚信',
- '崇敬',
- '内静',
- '模范制作',
- '俭约加工',
- '模范制作',
- '俭约加工',
- '俭约加工',
+    m1 = ['闲静',
  '俭约加工',
  '改革',
  '俭约加工',
+ '坯料加工',
  '俭约加工',
- '阔步',
- '比尔格的祝福',
- '模范制作']
+ #'加工',
+ #'精修',
+ #'注视加工',
+ '掌握',
+ '制作', '制作', '制作', '制作']
     
     print(output(m1))
-    eval_on_average(m1, goal)
+    eval_on_average(m1, goal)#, hrd)
 
     
                 

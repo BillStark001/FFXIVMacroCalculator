@@ -50,13 +50,13 @@ key_dict_total = [
 key_dict_no_rate = [
  '制作',
  #'高速制作',
- '集中制作',
+ #'集中制作',
  '模范制作',
  '注视制作',
  '坯料制作',
  '加工',
  #'仓促',
- '集中加工',
+ #'集中加工',
  '中级加工',
  '注视加工',
  '坯料加工',
@@ -76,17 +76,17 @@ key_dict_no_rate = [
  '阔步',
  '精修',
  '内静',
- '观察',
- '最终确认',
- # '掌握', 
- '秘诀'
+ '观察','观察','观察','观察',
+ #'掌握', 
+ #'秘诀', 
+ '最终确认'
  ]
 
-key_dict = key_dict_no_rate# + ['掌握'] * 8
+key_dict = key_dict_no_rate + ['掌握'] * 8
 
 key_count = len(key_dict)
-macro_length = 15
-level = 67
+macro_length = 28
+level = 80
 double_mapping = 2
 single_mapping = 2
 
@@ -160,10 +160,13 @@ def reproduce_agent(a1, a2, kc=key_count, mr=mutation_rate):
 def gen_population(getnew = lambda: get_new_agent(key_count, macro_length), count=total_population):
     return [getnew() for i in range(count)]
 
-def eval_agent(agent, goal, hq_rate_dict=hq_rate):
+def eval_agent(agent, goal, hq_rate_dict=hq_rate, t_fr=0.9):
     sim = [(1, ffprod.init_state())]
-    for m in represent(agent):
-        sim = ffprod.simulate_seq(m, sim, goal, max_count=3000, hq_rate_dict=hq_rate_dict)
+    loss_fr = 0
+    for i, m in enumerate(represent(agent)):
+        sim, fr = ffprod.simulate_seq(m, sim, goal, max_count=3000, hq_rate_dict=hq_rate_dict)
+        if fr > t_fr:
+            loss_fr += 1
     loss = get_loss(*goal)
     ans1 = 0
     ans2 = 0
@@ -171,6 +174,7 @@ def eval_agent(agent, goal, hq_rate_dict=hq_rate):
         ans1 += res[0]
         ans2 += res[0] * loss(*(res[1][1: 5]))
     ans2 /= ans1
+    ans2 -= loss_fr * 0.05
     return ans1, ans2
 
 def eval_population(pop, goal, hq_rate=hq_rate):
@@ -193,15 +197,24 @@ def select_and_regen(pop_eval, tp=total_population, sp=select_population, mr=mut
     return ans
     pass
 
-gshxd = lambda x = 0: (ffprod.eval_on_average(quick_repr(ev[x]), goal) or print(ffprod.output(quick_repr(ev[x]))))
+def gshxd(x=0): 
+    q = quick_repr(ev[x])
+    ffprod.eval_on_average(q, goal)
+    o = ffprod.output(q)
+    for oo in o: 
+        print()
+        print(oo)
+        print()
 
 if __name__ == '__main__':
+    np.set_printoptions(suppress=True)
     try:
         assert pop
     except:
         pop = gen_population()
-    goal = ffprod.get_goal_by_data(569, 619, 2214, 32860, 60, 415)
-    #goal = (1265.5251141552512, 5325.375939849624, 70, 507)
+    #goal = ffprod.get_goal_by_data(585, 631, 2214, 32860, 60, 415) # 伊修加德70
+    #goal = ffprod.get_goal_by_data(442, 537, 5543, 28331, 70, 522) # 前言礼裙
+    goal = ffprod.get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
     for _ in tqdm(range(1000)):
         ev = eval_population(pop, goal)
         print(ev[0][1], np.mean([x[1] for x in ev[:100]]))
