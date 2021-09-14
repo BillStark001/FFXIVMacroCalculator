@@ -174,13 +174,14 @@ def eval_agent(agent, goal, hq_rate_dict=hq_rate, t_fr=0.9):
         ans1 += res[0]
         ans2 += res[0] * loss(*(res[1][1: 5]))
     ans2 /= ans1
-    ans2 -= loss_fr * 0.05
+    ans2 -= loss_fr * 0.01
     return ans1, ans2
 
 def eval_population(pop, goal, hq_rate=hq_rate):
     d = []
     for agent in pop:
         d.append((agent, eval_agent(agent, goal, hq_rate_dict=hq_rate)[1]))
+    d.sort(key=lambda x: x[1], reverse=True)
     return d
 
 def select_and_regen(pop_eval, tp=total_population, sp=select_population, mr=mutation_rate):
@@ -215,8 +216,8 @@ if __name__ == '__main__':
     #goal = ffprod.get_goal_by_data(585, 631, 2214, 32860, 60, 415) # 伊修加德70
     #goal = ffprod.get_goal_by_data(442, 537, 5543, 28331, 70, 522) # 前言礼裙
     goal = ffprod.get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
-    for _ in tqdm(range(1000)):
+    for it in range(100000):
         ev = eval_population(pop, goal)
-        print(ev[0][1], np.mean([x[1] for x in ev[:100]]))
+        print(f'Iteration #{it}: best={ev[0][1]}, mean_of_top={np.mean([x[1] for x in ev[:100]])}')
         pop = select_and_regen(ev)
         
