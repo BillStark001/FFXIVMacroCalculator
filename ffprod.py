@@ -242,7 +242,8 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
         if h == 3: 
             ansss.append([a, (n, p, q, e, z, i, 0, l)])
         # doubtful
-        # elif h == 0: h = 1
+        elif h != 1: 
+            ansss.append([a, (n, p, q, e, z, i, 1, l)])
         else: 
             for h_, hr in zip([0, 1, 2, 3], hq_rate_dict):
                 if hr <= 0: continue
@@ -250,6 +251,28 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     
     # update L by operation
     return flag, ansss
+
+# condition related
+
+# craftsmanship, control
+def calculate_base_effect(d_level, cm, ct, suggested_cm, suggested_ct) :
+    # level difference factor
+    d_level = min(max(-30, d_level), 20)
+    if d_level < -20:
+        ldf_cm = 0.8 + 0.02 * (d_level + 30)
+        ldf_ct = 0.6 + 0.04 * (d_level + 30)
+    elif d_level > 0:
+        ldf_cm = [1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.27, 1.29, 1.31, 1.33, 
+                  1.35, 1.37, 1.39, 1.41, 1.43, 1.45, 1.46, 1.47, 1.48, 1.49, 1.5][d_level]
+        ldf_ct = 1
+    else:
+        ldf_cm = ldf_ct = 1    
+    
+    ans_cm = int((ldf_cm * (0.21 * cm + 2) * (10000 + cm)) / (10000 + suggested_cm))
+    ans_ct = int((ldf_ct * (0.35 * ct + 35) * (10000 + ct)) / (10000 + suggested_ct))
+    
+    return ans_cm, ans_ct
+
 
 def get_goal_by_data(ep, eq, pp, qq, e, z):
     p = 100 * pp / ep
@@ -289,25 +312,31 @@ def output(m):
 if __name__ == "__main__":
     
     #goal = (1265.5251141552512, 5325.375939849624, 70, 507)
-    goal = get_goal_by_data(168, 331, 1919, 10755, 80, 4001)
+    goal = get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
     mk = get_opr('制作', oprs)
     hrd = [0, 1, 0, 0]
         
     m1 = ['坚信', '内静', '改革', '加工', '加工', '加工', '加工', '阔步', '精修', '改革', '中级加工', '中级加工', '阔步', '比尔格的祝福', '制作']
     m1 = ['闲静',
+ '加工',
  '俭约加工',
- '改革',
- '俭约加工',
- '坯料加工',
- '俭约加工',
- #'加工',
- #'精修',
- #'注视加工',
+ '加工',
  '掌握',
- '制作', '制作', '制作', '制作']
+ '改革',
+ '长期俭约',
+ '坯料加工',
+ '坯料加工',
+ '比尔格的祝福',
+ '坯料制作',
+ '崇敬',
+ '坯料制作',
+ '坯料制作',
+ '坯料制作',
+ '制作']
     
-    print(output(m1))
-    eval_on_average(m1, goal)#, hrd)
+    for m in output(m1): print(m)
+    eval_on_average(m1, goal)
+    eval_on_average(m1, goal, hrd)
 
     
                 

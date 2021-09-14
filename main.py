@@ -89,17 +89,14 @@ level = 80
 double_mapping = 2
 single_mapping = 2
 
-mutation_rate = 0.4
+mutation_rate = 0.3
 total_population = 1500
 select_population = int(total_population * 0.15)
-preserve_population = int(total_population * 0.25)
+preserve_population = int(total_population * 0.15)
 
 hq_rate = [0, 1, 0, 0] # no hq at all to ease the simulation
 
-'''
-agent: (W, b) W: [rs, vs+1] b; [vs+1]
-
-'''
+# loss related
 
 def sigmoid(x0=0, y0=0, dy=1, k0=0.25):
     dx = dy * (0.25 / k0)
@@ -107,6 +104,7 @@ def sigmoid(x0=0, y0=0, dy=1, k0=0.25):
 
 def get_loss(p, q, e, z):
     lp1 = sigmoid(p*0.75, 0, 1.5, 1.5/p)
+    lp2 = lambda x: min(x/p, 1)**2.5
     lpup = lp1(p*1.05)**3
     lp = lambda x: min(lp1(x)**3 / lpup, 1) * 1.2
     lq_ = sigmoid(q*0.8, 0, 0.7, 5/q)
@@ -114,8 +112,10 @@ def get_loss(p, q, e, z):
     le_ = sigmoid(e+7.5, 0, 1, -1/7.5)
     le = lambda x: le_(x) + min(0, -(x-e-7.5))
     lz = sigmoid(z*1.25, 0, 1, -2.2/z)
-    return lambda P, Q, E, Z: lp(P) + lq(Q)*6*lp1(P) + le(E)+lz(Z)+4*min(min(lp(P), lq(Q)), min(le(E), lz(Z)))
-                                                      
+    return lambda P, Q, E, Z: lp(P) + lq(Q)*lp2(P)*6 + le(E)+lz(Z)+4*min(min(lp(P), lq(Q)), min(le(E), lz(Z)))
+                                                     
+
+    
 quick_repr = lambda a: [key_dict[x] for x in a[0]]
 def represent(agent, d=key_dict, l=level):
     m1 = [d[x] for x in agent]
@@ -127,9 +127,13 @@ def get_new_agent(c=key_count, l=macro_length):
 
 def reproduce_agent(a1, a2, kc=key_count, mr=mutation_rate):
     mr2 = mr * 0.7
-    mask = np.random.choice(3, size=len(a1), p=[(1-mr2)/2, (1-mr2)/2, mr2])
     a = [a1, a2]
-    ans = [a[mask[i]][i] if mask[i] < 2 else np.random.randint(kc) for i in range(len(a1))]
+    ans = []
+    while len(ans) < len(a1):
+        ans += a[np.random.choice(2)][len(ans): len(ans)+np.random.choice(6)]
+    ans = ans[:len(a1)]
+    #mask = np.random.choice(3, size=len(a1), p=[(1-mr2)/2, (1-mr2)/2, mr2])
+    #ans = [a[mask[i]][i] if mask[i] < 2 else np.random.randint(kc) for i in range(len(a1))]
     mask2 = np.random.choice(2, size=len(a1), p=[1-mr2, mr2])
     for i in range(len(a1) - 1, -1, -1):
         if mask2[i] == 1:
@@ -208,7 +212,7 @@ def select_and_regen(pop_eval,
 
 def gshxd(x=0): 
     q = quick_repr(ev[x])
-    ffprod.eval_on_average(q, goal)
+    ffprod.eval_on_average(q, goal, hq_rate)
     o = ffprod.output(q)
     for oo in o: 
         print()
@@ -222,8 +226,8 @@ if __name__ == '__main__':
     except:
         pop = gen_population()
     #goal = ffprod.get_goal_by_data(585, 631, 2214, 32860, 60, 415) # 伊修加德70
-    #goal = ffprod.get_goal_by_data(442, 537, 5543, 28331, 70, 522) # 前言礼裙
-    goal = ffprod.get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
+    goal = ffprod.get_goal_by_data(442, 537, 5543, 28331, 70, 522) # 前言礼裙
+    #goal = ffprod.get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
     for it in range(100000):
         try:
             ev = eval_population(pop, goal)
