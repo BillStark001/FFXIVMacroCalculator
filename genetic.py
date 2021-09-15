@@ -7,94 +7,9 @@ Created on Mon Sep 13 01:53:48 2021
 
 import numpy as np
 import ffprod
+import utils
 import random
 
-from tqdm import tqdm
-
-key_dict_total = [
- '制作',
- '高速制作',
- '集中制作',
- '模范制作',
- '注视制作',
- '坯料制作',
- '加工',
- '仓促',
- '集中加工',
- '中级加工',
- '注视加工',
- '坯料加工',
- '精密制作',
- '专心加工',
- '俭约加工',
- # '工匠的神速技巧',
- '坚信',
- '闲静',
- '元素之印记',
- '比尔格的祝福',
- '俭约',
- '长期俭约',
- '改革',
- '崇敬',
- '元素之美名',
- '阔步',
- '精修',
- '内静',
- '观察',
- '最终确认',
- # '掌握', 
- '秘诀'
- ]
-
-key_dict_no_rate = [
- '制作',
- #'高速制作',
- #'集中制作',
- '模范制作',
- '注视制作',
- '坯料制作',
- '加工',
- #'仓促',
- #'集中加工',
- '中级加工',
- '注视加工',
- '坯料加工',
- '精密制作',
- # '专心加工',
- '俭约加工',
- # '工匠的神速技巧',
- '坚信',
- '闲静',
- '元素之印记',
- '比尔格的祝福',
- '俭约','俭约','俭约',
- '长期俭约','长期俭约', 
- '改革','改革','改革',
- '崇敬','崇敬','崇敬',
- '元素之美名',
- '阔步',
- '精修',
- '内静',
- '观察','观察','观察','观察',
- #'掌握', 
- #'秘诀', 
- '最终确认'
- ]
-
-key_dict = key_dict_no_rate + ['掌握'] * 8
-
-key_count = len(key_dict)
-macro_length = 28
-level = 80
-double_mapping = 2
-single_mapping = 2
-
-mutation_rate = 0.3
-total_population = 1500
-select_population = int(total_population * 0.15)
-preserve_population = int(total_population * 0.15)
-
-hq_rate = [0, 1, 0, 0] # no hq at all to ease the simulation
 
 # loss related
 
@@ -114,18 +29,39 @@ def get_loss(p, q, e, z):
     lz = sigmoid(z*1.25, 0, 1, -2.2/z)
     return lambda P, Q, E, Z: lp(P) + lq(Q)*lp2(P)*6 + le(E)+lz(Z)+4*min(min(lp(P), lq(Q)), min(le(E), lz(Z)))
                                                      
+quick_repr = lambda a, oprs: [oprs[x] for x in a[0]]
 
-    
-quick_repr = lambda a: [key_dict[x] for x in a[0]]
-def represent(agent, d=key_dict, l=level):
-    m1 = [d[x] for x in agent]
+def represent(agent, oprs, level):
+    m1 = [oprs[x] for x in agent]
     m2 = [ffprod.get_opr(x, ffprod.oprs, level=level) for x in m1]
     return m2
 
-def get_new_agent(c=key_count, l=macro_length):
+def get_new_agent(c, l):
+    '''
+    Parameters
+    ----------
+    c : int, the count of operation
+    l : int, macro length
+
+    Returns
+    -------
+    list, generated agent
+    '''
     return [np.random.randint(c) for i in range(l)]
 
-def reproduce_agent(a1, a2, kc=key_count, mr=mutation_rate):
+def reproduce_agent(a1, a2, kc, mr):
+    '''
+    Parameters
+    ----------
+    a1 : TYPE
+        parent1.
+    a2 : TYPE
+        parent2.
+    kc : TYPE
+        count of operation.
+    mr : TYPE
+        mutation rate.
+    '''
     mr2 = mr * 0.7
     a = [a1, a2]
     ans = []
@@ -161,13 +97,10 @@ def reproduce_agent(a1, a2, kc=key_count, mr=mutation_rate):
     return ans
     
 
-def gen_population(getnew = lambda: get_new_agent(key_count, macro_length), count=total_population):
-    return [getnew() for i in range(count)]
-
-def eval_agent(agent, goal, hq_rate_dict=hq_rate, t_fr=0.9):
+def eval_agent(agent, goal, oprs, level, hq_rate_dict, t_fr=0.9):
     sim = [(1, ffprod.init_state())]
     loss_fr = 0
-    for i, m in enumerate(represent(agent)):
+    for i, m in enumerate(represent(agent, oprs, level)):
         sim, fr = ffprod.simulate_seq(m, sim, goal, max_count=3000, hq_rate_dict=hq_rate_dict)
         if fr > t_fr:
             loss_fr += 1
@@ -181,18 +114,15 @@ def eval_agent(agent, goal, hq_rate_dict=hq_rate, t_fr=0.9):
     ans2 -= loss_fr * 0.01
     return ans1, ans2
 
-def eval_population(pop, goal, hq_rate=hq_rate):
+def eval_population(pop, goal, oprs, level, hq_rate):
     d = []
     for agent in pop:
-        d.append((agent, eval_agent(agent, goal, hq_rate_dict=hq_rate)[1]))
+        d.append((agent, eval_agent(agent, goal, oprs, level, hq_rate_dict=hq_rate)[1]))
     d.sort(key=lambda x: x[1], reverse=True)
     return d
 
-def select_and_regen(pop_eval, 
-                     tp=total_population, 
-                     sp=select_population, 
-                     pp=preserve_population, 
-                     mr=mutation_rate):
+def select_and_regen(pop_eval, opr_count, ga_args):
+    tp, sp, pp, mr = ga_args
     pop_eval.sort(key=lambda x: x[1], reverse=True)
     pop_eval_s = pop_eval[:sp]
     pop_eval_p = pop_eval[sp:]
@@ -203,37 +133,30 @@ def select_and_regen(pop_eval,
     for _ in range(tp-sp-pp):
         a1 = psp[np.random.randint(sp+pp)][0]
         a2 = psp[np.random.randint(sp+pp)][0]
-        a3 = reproduce_agent(a1, a2, mr=mr)
+        a3 = reproduce_agent(a1, a2, opr_count, mr)
         if isinstance(a3, float):
             print(a1, a2)
         ans.append(a3)
     return ans
     pass
 
-def gshxd(x=0): 
-    q = quick_repr(ev[x])
-    ffprod.eval_on_average(q, goal, hq_rate)
-    o = ffprod.output(q)
-    for oo in o: 
-        print()
-        print(oo)
-        print()
-
 if __name__ == '__main__':
     np.set_printoptions(suppress=True)
     try:
         assert pop
     except:
-        pop = gen_population()
-    #goal = ffprod.get_goal_by_data(585, 631, 2214, 32860, 60, 415) # 伊修加德70
-    #goal = ffprod.get_goal_by_data(442, 537, 5543, 28331, 70, 522) # 前言礼裙
-    goal = ffprod.get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
-    for it in range(100000):
+        args_file = utils.jload('args_example_1.json')
+        goal, opr_dict, hq_dict, args_ga, args_sys = utils.parse_args(args_file)
+        macro_length, player_level, max_iteration, output_iteration = args_sys
+        total_population = args_ga[0]
+        opr_count = len(opr_dict)
+        pop = [get_new_agent(opr_count, macro_length) for i in range(total_population)]
+    for it in range(max_iteration):
         try:
-            ev = eval_population(pop, goal)
+            ev = eval_population(pop, goal, opr_dict, player_level, hq_dict)
             print(f'Iteration #{it}: best={ev[0][1]}, mean_of_top={np.mean([x[1] for x in ev[:100]])}')
-            pop = select_and_regen(ev)
+            pop = select_and_regen(ev, opr_count, args_ga)
         except KeyboardInterrupt:
-            gshxd()
+            for m in ffprod.gen_output_lines([quick_repr(ev[0], opr_dict)], goal): print(m)
             break
         

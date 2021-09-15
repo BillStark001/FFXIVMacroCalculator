@@ -1,0 +1,23 @@
+{
+  "Name": '前沿礼裙', 
+  "Player": {
+    "LV": 80,
+    "CP": 522,
+    "CM": 1,
+    "CT": 1,
+    "Manipulation": true
+  },
+  "Recipe": {
+    "Format": 2,
+    "TrainedEye": false,
+    "DP": 442,
+    "DQ": 537,
+    "P": 5543,
+    "Q": 28331,
+    "E": 70
+  },
+  "System": {
+    "MacroLength": 28,
+    "OITC": 40
+  }
+}

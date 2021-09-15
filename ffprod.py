@@ -7,6 +7,9 @@ Created on Mon Sep 13 01:53:48 2021
 
 import numpy as np
 import pandas as pd
+from prettytable import PrettyTable
+
+import utils
 
 from collections import defaultdict
 
@@ -44,12 +47,12 @@ def read_data(path):
     return c2
 
 def get_opr(name, oprs, level=80):
-    ans = None
+    ans = dict(name=name, least_level=-114514)
     for o in oprs:
         if o['least_level'] > level:
             continue
         elif o['name'] == name:
-            if ans == None or ans['least_level'] < level:
+            if ans['least_level'] < level:
                 ans = o
     return ans
 
@@ -119,7 +122,7 @@ def eval_seq(sim):
 
 def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25, 0.1]):
     
-    if opr == None:
+    if opr == None or opr['least_level'] < 0:
         return False, [[total_rate, state]]
     
     N, P, Q, E, Z, I, H, L = state
@@ -200,6 +203,7 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     # if I > 11: I = 11
     if I_ > 11: I_ = 11
     if Z < 0: Z = 0
+    if E < 0: E = 0
     
     if not ('no_work_time' in opr['sp_eff']):  
         N = N + 1
@@ -254,25 +258,7 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
 
 # condition related
 
-# craftsmanship, control
-def calculate_base_effect(d_level, cm, ct, suggested_cm, suggested_ct) :
-    # level difference factor
-    d_level = min(max(-30, d_level), 20)
-    if d_level < -20:
-        ldf_cm = 0.8 + 0.02 * (d_level + 30)
-        ldf_ct = 0.6 + 0.04 * (d_level + 30)
-    elif d_level > 0:
-        ldf_cm = [1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.27, 1.29, 1.31, 1.33, 
-                  1.35, 1.37, 1.39, 1.41, 1.43, 1.45, 1.46, 1.47, 1.48, 1.49, 1.5][d_level]
-        ldf_ct = 1
-    else:
-        ldf_cm = ldf_ct = 1    
-    
-    ans_cm = int((ldf_cm * int(0.21 * cm + 2) * int(10000 + cm)) / int(10000 + suggested_cm))
-    ans_ct = int((ldf_ct * int(0.35 * ct + 35) * int(10000 + ct)) / int(10000 + suggested_ct))
-    
-    # ep, eq
-    return ans_cm, ans_ct
+
 
 
 def get_goal_by_data(ep, eq, pp, qq, e, z):
@@ -280,64 +266,67 @@ def get_goal_by_data(ep, eq, pp, qq, e, z):
     q = 100 * qq / eq
     return (p, q, e, z)
 
-def eval_on_average(m1, goal, hq_rate_dict=hq_dict):
+def eval_macro(m1, goal, hq_rate_dict=hq_dict, transfer_to_table=False):
     sss = [(1, init_state())]
-    print ('# 技能 [制作进度 加工进度 耐久 制作力] 失败率 样本数')
+    outputs = [['#', 'skills', 'process', 'quality', 'durability', 'CP', 'failed rate', 'sampling number']]
     mult = np.array([1, 1, -1, -1])
     diff = np.array([0, 0, goal[2], goal[3]])
     m2 = [get_opr(x, oprs) for x in m1]
     for i in range(len(m2)):
         m = m2[i]
         sss, fr = simulate_seq(m, sss, goal, max_count=1000, hq_rate_dict=hq_rate_dict)
-        print(i + 1, m['name'], (np.around(eval_seq(sss)[1], decimals=3)*mult+diff), fr, len(sss))
-    print (f'条件 {np.array(goal)}')
+        op = [i + 1, m['name']] + list(np.around(eval_seq(sss)[1]*mult+diff, decimals=3)) + [fr, len(sss)]
+        outputs.append(op)
+    outputs.append(['N/A', 'goal'] + list(np.around(goal, decimals=3)) + ['N/A', 'N/A'])
+    if transfer_to_table:
+        op1 = PrettyTable(outputs[0])
+        for op in outputs[1:]:
+            op1.add_row(op)
+        outputs = str(op1).split('\n')
+        if outputs[-1] == '':
+            outputs = outputs[:-1]
+    return outputs
 
 def output(m):
     if len(m) > 15:
         ans = []
-        anss = ''
+        anss = []
         for i in range(len(m)):
             if i % 14 == 0 and i > 0:
-                anss += f'/e "Macro {int(i / 14)} Completed."'
+                anss.append(f'/e "Macro {int(i / 14)} Completed."')
                 ans.append(anss)
-                anss = ''
-            anss += f'/ac "{m[i]}" <wait.3>\n'
-        anss += f'/e "Macro {len(ans) + 1} Completed."'
+                anss = []
+            anss.append(f'/ac "{m[i]}" <wait.3>')
+        anss.append(f'/e "Macro {len(ans) + 1} Completed."')
         ans.append(anss)
         return ans
-    ans = ''
+    ans = []
     for s in m:
-        ans += f'/ac "{s}" <wait.3>\n'
+        ans.append(f'/ac "{s}" <wait.3>')
     return [ans[:-1]]
+
+def gen_output_lines(ms, goal):
+    ans = []
+    for n, macro in enumerate(ms):
+        ans += [f'Macro #{n+1}:', '----------------']
+        for sub_macro in output(macro):
+            ans += sub_macro + ['----------------']
+        ans += ['Evaluation Result(Disallow HQ):']
+        ans += eval_macro(macro, goal, hq_rate_dict=utils.hq_dict_disallow, transfer_to_table=True)
+        ans += ['Evaluation Result(Allow HQ):']
+        ans += eval_macro(macro, goal, hq_rate_dict=utils.hq_dict_allow, transfer_to_table=True)
+        
+    return ans    
 
 if __name__ == "__main__":
     
-    #goal = (1265.5251141552512, 5325.375939849624, 70, 507)
     goal = get_goal_by_data(447, 552, 7414, 46553, 70, 522) # 唯美装备
-    mk = get_opr('制作', oprs)
     hrd = [0, 1, 0, 0]
         
     m1 = ['坚信', '内静', '改革', '加工', '加工', '加工', '加工', '阔步', '精修', '改革', '中级加工', '中级加工', '阔步', '比尔格的祝福', '制作']
-    m1 = ['闲静',
- '加工',
- '俭约加工',
- '加工',
- '掌握',
- '改革',
- '长期俭约',
- '坯料加工',
- '坯料加工',
- '比尔格的祝福',
- '坯料制作',
- '崇敬',
- '坯料制作',
- '坯料制作',
- '坯料制作',
- '制作']
-    
-    for m in output(m1): print(m)
-    eval_on_average(m1, goal)
-    eval_on_average(m1, goal, hrd)
+
+    op1 = gen_output_lines([m1], goal)
+    for m in op1: print(m)
 
     
                 
