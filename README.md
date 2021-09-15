@@ -66,12 +66,12 @@ The reference version of the game is 5.55. The last update date of the tool is S
 
         会慢一点库啵；会出现奇奇怪怪的问题库啵
 	* （未实装）使用的算法 Algorithm 字串 默认"Genetic"
-	* 算法参数 Arguments 根据不同算法不同 默认[1500, 0.15, 0.15, 0.3]
+	* 算法参数 Arguments 根据不同算法不同
         * 遗传算法：
             * 种群个数 P 正整数 默认1500
             * 选择率 SR 浮点数 0~1 默认0.15
             * 保留率 PR 浮点数 0~1 默认0.15
-            * 变异率 MR 浮点数 0~1 默认0.15
+            * 变异率 MR 浮点数 0~1 默认0.3
 
         不知道是什么意思的就别动，用默认的一般不会有问题库啵。。。
 	* 最大迭代次数 MITC 正整数 默认100000

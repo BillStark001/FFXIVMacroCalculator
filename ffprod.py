@@ -303,7 +303,7 @@ def output(m):
     ans = []
     for s in m:
         ans.append(f'/ac "{s}" <wait.3>')
-    return [ans[:-1]]
+    return [ans]
 
 def gen_output_lines(ms, goal):
     ans = []

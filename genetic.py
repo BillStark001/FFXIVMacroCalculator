@@ -145,7 +145,7 @@ if __name__ == '__main__':
     try:
         assert pop
     except:
-        args_file = utils.jload('args_example_1.json')
+        args_file = utils.jload('additional/gshxd.json')
         goal, opr_dict, hq_dict, args_ga, args_sys = utils.parse_args(args_file)
         macro_length, player_level, max_iteration, output_iteration = args_sys
         total_population = args_ga[0]
