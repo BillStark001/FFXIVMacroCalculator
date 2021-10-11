@@ -30,6 +30,9 @@ The reference version of the game is 5.55. The last update date of the tool is S
 	* 作业精度 CM 正整数
 	* 加工精度 CT 正整数
 	* 掌握可用 Manipulation 布尔
+	* 食物/药水效果 Buffs 形如[[pm, pt, pp, mm, mt, mp]...]的列表
+    	分别对应制作精度、加工精度、制作力的百分比和最大值库啵
+    	比如辣酱炒全蟹就是[0, 0.06, 0.26, 0, 70, 72]库啵
 
         掌握不能靠升级自然取得，需要去接职能任务库啵
 * （未实装）配方Recipe：
@@ -42,6 +45,8 @@ The reference version of the game is 5.55. The last update date of the tool is S
 	* 建议加工精度 SCT 正整数
 	* 难度 P 正整数
 	* 最大品质 Q 正整数
+	* 初始品质 IQ 正整数
+    	由于使用了HQ材料而得到的品质库啵
 	* 耐久 E 正整数
 * 配方 Recipe：
 	* 格式 Format = 2

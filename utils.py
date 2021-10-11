@@ -73,8 +73,18 @@ def parse_args(args):
     else:
         te = r['TrainedEye']
         dpdq = (r['DP'], r['DQ'])
-    pq = convert_goal(*dpdq, r['P'], r['Q'])
-    goal = pq + (r['E'], p['CP'])
+    pq = convert_goal(*dpdq, r['P'], r['Q'] - (r['IQ'] if 'IQ' in r else 0))
+    goal_raw = pq + (r['E'], p['CP'])
+    goal = list(goal_raw)
+    buffs = p['Buffs'] if 'Buffs' in p else []
+    for buff in buffs:
+        # TODO CM, CT
+        bcm, bct, bcp, bmcm, bmct, bmcp = buff
+        ocm = p['CM']
+        oct_ = p['CT']
+        ocp = goal[3]
+        goal[3] = int(min(ocp + bmcp, ocp * (1 + bcp)))
+        
     
     opr_dict = get_opr_dict(
         s['AllowProbSkills'] if 'AllowProbSkills' in s else False, 

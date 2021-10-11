@@ -189,7 +189,10 @@ def simulate_state(opr, state, goal, total_rate=1, hq_rate_dict = [0, 0.65, 0.25
     Z = Z + df
     I_ = I + opr['d_inner_static'] if I > 0 or 'add_inner_static' in opr['sp_eff'] else 0
     
-    if 'endurance_add5' in L and not ('no_work_time' in opr['sp_eff']):
+    # TODO BUG!!!
+    if 'endurance_add5' in L and \
+        not ('no_work_time' in opr['sp_eff']) and \
+        not ('endurance_add5' in opr['timed_eff']):
         if E < GE: E -= 5
     
     if 'reset_inner_static' in opr['sp_eff']:
