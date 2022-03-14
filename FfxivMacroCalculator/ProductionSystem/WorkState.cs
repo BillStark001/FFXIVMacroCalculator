@@ -12,6 +12,7 @@ namespace FfxivMacroCalculator.ProductionSystem
         Normal = 1, 
         High = 2, 
         Highest = 3
+
     }
 
     public class WorkState
@@ -23,7 +24,10 @@ namespace FfxivMacroCalculator.ProductionSystem
         public int ProductionForce = 0;
         public int InnerStatic = 0;
         public QualityState CurrentQuality = QualityState.Normal;
-        
 
+        public bool QualityBelow(QualityState s)
+        {
+            return (int)CurrentQuality < (int)s;
+        }
     }
 }

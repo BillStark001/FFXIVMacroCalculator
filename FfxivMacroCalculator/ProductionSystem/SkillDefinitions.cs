@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FfxivMacroCalculator.ProductionSystem
 {
-    public partial class Skill
+    public partial sealed class Skill
     {
     }
 }

@@ -40,6 +40,14 @@ namespace FfxivMacroCalculator.ProductionSystem
         public int DEndurance { get; private set; } = 0;
         public int DInnerStatic { get; private set; } = 0;
         public SpecialEffect SpecialEffect { get; private set; } = SpecialEffect.None;
-        
+
+        public PersistentEffect PersistentEffect { get; private set; } = new();
+
+        private Skill() { }
+
+        public bool Contains(SpecialEffect eff)
+        {
+            return (int)(SpecialEffect | eff) != 0;
+        }
     }
 }
