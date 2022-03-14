@@ -4,7 +4,7 @@ A simple tool to calculate the macro of operation codes used by craftsmen for a 
 
 Currently it only supports the Simplified Chinese version. It will support other languages in the future.
 
-The reference version of the game is 5.55. The last update date of the tool is Sep 15, 2021.
+The reference version of the game is 5.55. The last update date of the tool is Oct 11, 2021.
 
 ## 因为只支持中文所以用中文写说明文档没问题吧库啵
 
