@@ -2,7 +2,7 @@
 {
     using System.Collections.ObjectModel;
     using StateSet = List<(double, CraftState)>;
-    public class SimulateResult
+    public record SimulateResult
     {
         public bool Succeeded { get; } = false;
         public StateSet PossibleStates { get; } = new();
@@ -15,26 +15,19 @@
 
     }
 
-    public class SetSimulateResult
+    public record SetSimulateResult
     {
         public double FailedRate { get; } = 0;
         public StateSet PossibleStates { get; } = new();
 
-        public SetSimulateResult(double successRate, StateSet states)
+        public SetSimulateResult(double failedRate, StateSet states)
         {
-            FailedRate = successRate;
+            FailedRate = failedRate;
             PossibleStates = states;
         }
 
     }
 
-    public class RecipeGoal
-    {
-        public int Progress;
-        public int Quality;
-        public int Durability;
-        public int CraftingPoints;
-    }
 
 
     public static class Simulator

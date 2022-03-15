@@ -12,7 +12,7 @@ namespace FfxivMacroCalculator.CraftingSystem
 
     public partial class Action
     {
-        public static Action BasicSynthesis = new()
+        public static readonly Action BasicSynthesis = new()
         {
             ActionKey = "制作",
             LeastLevel = 1,
@@ -23,7 +23,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DDurability = 10,
         };
 
-        public static Action BasicSynthesis2 = new()
+        public static readonly Action BasicSynthesis2 = new()
         {
             ActionKey = "制作",
             LeastLevel = 31,
@@ -35,7 +35,7 @@ namespace FfxivMacroCalculator.CraftingSystem
         };
 
 
-        public static Action RapidSynthesis = new()
+        public static readonly Action RapidSynthesis = new()
         {
             ActionKey = "高速制作",
             LeastLevel = 9,
@@ -46,7 +46,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DDurability = 10,
         };
 
-        public static Action RapidSynthesis2 = new()
+        public static readonly Action RapidSynthesis2 = new()
         {
             ActionKey = "高速制作",
             LeastLevel = 63,
@@ -58,7 +58,7 @@ namespace FfxivMacroCalculator.CraftingSystem
         };
 
 
-        public static Action IntensiveSynthesis = new()
+        public static readonly Action IntensiveSynthesis = new()
         {
             ActionKey = "集中制作",
             LeastLevel = 78,
@@ -70,7 +70,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.OnlyGoodCondition,
         };
 
-        public static Action CarefulSynthesis = new()
+        public static readonly Action CarefulSynthesis = new()
         {
             ActionKey = "模范制作",
             LeastLevel = 62,
@@ -81,7 +81,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DDurability = 10,
         };
 
-        public static Action CarefulSynthesis2 = new()
+        public static readonly Action CarefulSynthesis2 = new()
         {
             ActionKey = "模范制作",
             LeastLevel = 82,
@@ -92,7 +92,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DDurability = 10,
         };
 
-        public static Action FocusedSynthesis = new()
+        public static readonly Action FocusedSynthesis = new()
         {
             ActionKey = "注视制作",
             LeastLevel = 67,
@@ -104,7 +104,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.MustSuccessAfterObserve,
         };
 
-        public static Action GroundWork = new()
+        public static readonly Action GroundWork = new()
         {
             ActionKey = "坯料制作",
             LeastLevel = 72,
@@ -116,7 +116,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.Effect50pIfNotEnoughDurability,
         };
 
-        public static Action GroundWork2 = new()
+        public static readonly Action GroundWork2 = new()
         {
             ActionKey = "坯料制作",
             LeastLevel = 86,
@@ -128,7 +128,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.Effect50pIfNotEnoughDurability,
         };
 
-        public static Action DelicateSynthesis = new()
+        public static readonly Action DelicateSynthesis = new()
         {
             ActionKey = "精密制作",
             LeastLevel = 76,
@@ -139,7 +139,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DDurability = 10,
         };
 
-        public static Action PrudentSynthesis = new()
+        public static readonly Action PrudentSynthesis = new()
         {
             ActionKey = "俭约制作",
             LeastLevel = 88,

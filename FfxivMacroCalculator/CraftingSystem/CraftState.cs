@@ -15,7 +15,7 @@ namespace FfxivMacroCalculator.CraftingSystem
 
     }
 
-    public class CraftState
+    public record CraftState
     {
         //var (N, P, Q, E, Z, I, H, L) = state
         public int CraftStep = 0;

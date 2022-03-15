@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FfxivMacroCalculator", "FfxivMacroCalculator\FfxivMacroCalculator.csproj", "{291ABDE8-A4D9-45DF-A3AA-809EB6A46387}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FfxivMacroCalculator", "FfxivMacroCalculator\FfxivMacroCalculator.csproj", "{291ABDE8-A4D9-45DF-A3AA-809EB6A46387}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FfxivMacroCalculator.UI", "FfxivMacroCalculator.UI\FfxivMacroCalculator.UI.csproj", "{69BAF76F-626E-411A-8D74-62C4F65F32F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{291ABDE8-A4D9-45DF-A3AA-809EB6A46387}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{291ABDE8-A4D9-45DF-A3AA-809EB6A46387}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{291ABDE8-A4D9-45DF-A3AA-809EB6A46387}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69BAF76F-626E-411A-8D74-62C4F65F32F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69BAF76F-626E-411A-8D74-62C4F65F32F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69BAF76F-626E-411A-8D74-62C4F65F32F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69BAF76F-626E-411A-8D74-62C4F65F32F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

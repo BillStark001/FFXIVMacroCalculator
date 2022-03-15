@@ -13,7 +13,7 @@ namespace FfxivMacroCalculator.CraftingSystem
     public partial class Action
     {
 
-        public static Action MuscleMemory = new()
+        public static readonly Action MuscleMemory = new()
         {
             ActionKey = "坚信",
             LeastLevel = 54,
@@ -31,7 +31,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action Reflect = new()
+        public static readonly Action Reflect = new()
         {
             ActionKey = "闲静",
             LeastLevel = 69,
@@ -46,7 +46,7 @@ namespace FfxivMacroCalculator.CraftingSystem
                 ActionEffect.AddInnerQuiet,
         };
 
-        public static Action ByregotsBlessing = new()
+        public static readonly Action ByregotsBlessing = new()
         {
             ActionKey = "比尔格的祝福",
             LeastLevel = 50,
@@ -62,7 +62,7 @@ namespace FfxivMacroCalculator.CraftingSystem
                 ActionEffect.ClearInnerQuiet,
         };
 
-        public static Action WasteNot = new()
+        public static readonly Action WasteNot = new()
         {
             ActionKey = "俭约",
             LeastLevel = 15,
@@ -78,7 +78,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action WasteNotII = new()
+        public static readonly Action WasteNotII = new()
         {
             ActionKey = "长期俭约",
             LeastLevel = 48,
@@ -94,7 +94,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action Innovation = new()
+        public static readonly Action Innovation = new()
         {
             ActionKey = "改革",
             LeastLevel = 26,
@@ -106,7 +106,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action Veneration = new()
+        public static readonly Action Veneration = new()
         {
             ActionKey = "崇敬",
             LeastLevel = 15,
@@ -118,7 +118,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action GreatStrides = new()
+        public static readonly Action GreatStrides = new()
         {
             ActionKey = "阔步", 
             LeastLevel = 21,
@@ -134,7 +134,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action MastersMend = new()
+        public static readonly Action MastersMend = new()
         {
             ActionKey = "精修",
             LeastLevel = 7,
@@ -146,7 +146,7 @@ namespace FfxivMacroCalculator.CraftingSystem
         };
 
 
-        public static Action Observe = new()
+        public static readonly Action Observe = new()
         {
             ActionKey = "观察",
             LeastLevel = 13,
@@ -164,7 +164,7 @@ namespace FfxivMacroCalculator.CraftingSystem
 
 
 
-        public static Action FinalAppraisal = new()
+        public static readonly Action FinalAppraisal = new()
         {
             ActionKey = "最终确认",
             LeastLevel = 42,
@@ -182,7 +182,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action TricksOfTheTrade = new()
+        public static readonly Action TricksOfTheTrade = new()
         {
             ActionKey = "秘诀",
             LeastLevel = 13,
@@ -194,7 +194,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.OnlyGoodCondition,
         };
 
-        public static Action Manipulation = new()
+        public static readonly Action Manipulation = new()
         {
             ActionKey = "掌握",
             LeastLevel = 65,

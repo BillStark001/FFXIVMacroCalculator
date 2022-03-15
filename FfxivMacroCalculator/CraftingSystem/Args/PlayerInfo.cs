@@ -18,6 +18,7 @@ namespace FfxivMacroCalculator.CraftingSystem.Args
         public int CT;
         public bool Manipulation;
         public bool Specialist;
+        public List<string> Foods = new();
 
         public ReadOnlyCollection<Action> GetActionSet() 
         {

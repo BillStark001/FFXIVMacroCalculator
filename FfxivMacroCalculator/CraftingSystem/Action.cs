@@ -58,7 +58,7 @@ namespace FfxivMacroCalculator.CraftingSystem
 
         public bool Contains(ActionEffect eff)
         {
-            return (int)(Effects | eff) != 0;
+            return (int)(Effects & eff) != 0;
         }
 
         public bool Contains(Effect state)
@@ -66,52 +66,57 @@ namespace FfxivMacroCalculator.CraftingSystem
             return TimedEffects.ContainsKey(state) && TimedEffects[state] > 0;
         }
 
+        public override string ToString()
+        {
+            return $"Action({ActionKey})";
+        }
+
 
         // generate sets
 
-        public static ICollection<Action> General = new ReadOnlyCollection<Action>( new[] 
+        public static ICollection<Action> General => new List<Action>()
         {
-            BasicSynthesis, 
-            BasicSynthesis2, 
-            RapidSynthesis, 
+            BasicSynthesis,
+            BasicSynthesis2,
+            RapidSynthesis,
             RapidSynthesis2,
-            IntensiveSynthesis, 
-            CarefulSynthesis, 
-            CarefulSynthesis2, 
-            FocusedSynthesis, 
-            GroundWork, 
-            GroundWork2, 
-            DelicateSynthesis, 
-            PrudentSynthesis, 
+            IntensiveSynthesis,
+            CarefulSynthesis,
+            CarefulSynthesis2,
+            FocusedSynthesis,
+            GroundWork,
+            GroundWork2,
+            DelicateSynthesis,
+            PrudentSynthesis,
 
-            BasicTouch, 
-            StandardTouch, 
-            AdvancedTouch, 
-            HastyTouch, 
-            PreciseTouch, 
-            FocusedTouch, 
-            PreparatoryTouch, 
-            PrudentTouch, 
-            TrainedFinesse, 
+            BasicTouch,
+            StandardTouch,
+            AdvancedTouch,
+            HastyTouch,
+            PreciseTouch,
+            FocusedTouch,
+            PreparatoryTouch,
+            PrudentTouch,
+            TrainedFinesse,
 
-            MuscleMemory, 
-            Reflect, 
-            ByregotsBlessing, 
-            WasteNot, 
-            WasteNotII, 
-            Innovation, 
-            Veneration, 
-            GreatStrides, 
-            MastersMend, 
-            Observe, 
-            FinalAppraisal, 
+            MuscleMemory,
+            Reflect,
+            ByregotsBlessing,
+            WasteNot,
+            WasteNotII,
+            Innovation,
+            Veneration,
+            GreatStrides,
+            MastersMend,
+            Observe,
+            FinalAppraisal,
             TricksOfTheTrade, 
             // Manipulation
-        });
+        }.AsReadOnly();
 
-        public static ICollection<Action> WithManipulation = new ReadOnlyCollection<Action>(new[]
+        public static ICollection<Action> WithManipulation => new List<Action>()
         {
             Manipulation
-        });
+        }.AsReadOnly();
     }
 }

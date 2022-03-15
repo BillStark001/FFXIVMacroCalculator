@@ -12,7 +12,7 @@ namespace FfxivMacroCalculator.CraftingSystem
 
     public partial class Action
     {
-        public static Action BasicTouch = new()
+        public static readonly Action BasicTouch = new()
         {
             ActionKey = "加工",
             LeastLevel = 5,
@@ -28,7 +28,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action StandardTouch = new()
+        public static readonly Action StandardTouch = new()
         {
             ActionKey = "中级加工",
             LeastLevel = 18,
@@ -45,7 +45,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action AdvancedTouch = new()
+        public static readonly Action AdvancedTouch = new()
         {
             ActionKey = "上级加工",
             LeastLevel = 84,
@@ -58,7 +58,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.CpTo18AfterStandardTouch,
         };
 
-        public static Action HastyTouch = new()
+        public static readonly Action HastyTouch = new()
         {
             ActionKey = "仓促",
             LeastLevel = 9,
@@ -70,7 +70,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DInnerQuiet = 1,
         };
 
-        public static Action PreciseTouch = new()
+        public static readonly Action PreciseTouch = new()
         {
             ActionKey = "集中加工",
             LeastLevel = 53,
@@ -83,7 +83,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.OnlyGoodCondition,
         };
 
-        public static Action FocusedTouch = new()
+        public static readonly Action FocusedTouch = new()
         {
             ActionKey = "注视加工",
             LeastLevel = 68,
@@ -96,7 +96,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.MustSuccessAfterObserve,
         };  
 
-        public static Action PreparatoryTouch = new()
+        public static readonly Action PreparatoryTouch = new()
         {
             ActionKey = "坯料加工",
             LeastLevel = 71,
@@ -108,7 +108,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DInnerQuiet = 2,
         };
 
-        public static Action PrudentTouch = new()
+        public static readonly Action PrudentTouch = new()
         {
             ActionKey = "俭约加工",
             LeastLevel = 66,
@@ -121,7 +121,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.OnlyNotInWasteNot,
         };
 
-        public static Action TrainedEye = new()
+        public static readonly Action TrainedEye = new()
         {
             ActionKey = "工匠的神速技巧",
             LeastLevel = 80,
@@ -134,7 +134,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.OnlyFirstStep,
         };
 
-        public static Action TrainedFinesse = new()
+        public static readonly Action TrainedFinesse = new()
         {
             ActionKey = "工匠的绝技",
             LeastLevel = 90,
