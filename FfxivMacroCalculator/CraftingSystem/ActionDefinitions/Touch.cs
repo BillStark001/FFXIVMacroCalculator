@@ -134,7 +134,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             Effects = ActionEffect.OnlyFirstStep,
         };
 
-        public static Action TrainedFinense = new()
+        public static Action TrainedFinesse = new()
         {
             ActionKey = "工匠的绝技",
             LeastLevel = 90,

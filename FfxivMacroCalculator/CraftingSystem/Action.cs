@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace FfxivMacroCalculator.CraftingSystem
 {
+
+
     public enum ActionEffect
     {
         None = 0, 
@@ -63,5 +65,53 @@ namespace FfxivMacroCalculator.CraftingSystem
         {
             return TimedEffects.ContainsKey(state) && TimedEffects[state] > 0;
         }
+
+
+        // generate sets
+
+        public ICollection<Action> General = new ReadOnlyCollection<Action>( new[] 
+        {
+            BasicSynthesis, 
+            BasicSynthesis2, 
+            RapidSynthesis, 
+            RapidSynthesis2,
+            IntensiveSynthesis, 
+            CarefulSynthesis, 
+            CarefulSynthesis2, 
+            FocusedSynthesis, 
+            GroundWork, 
+            GroundWork2, 
+            DelicateSynthesis, 
+            PrudentSynthesis, 
+
+            BasicTouch, 
+            StandardTouch, 
+            AdvancedTouch, 
+            HastyTouch, 
+            PreciseTouch, 
+            FocusedTouch, 
+            PreparatoryTouch, 
+            PrudentTouch, 
+            TrainedFinesse, 
+
+            MuscleMemory, 
+            Reflect, 
+            ByregotsBlessing, 
+            WasteNot, 
+            WasteNotII, 
+            Innovation, 
+            Veneration, 
+            GreatStrides, 
+            MastersMend, 
+            Observe, 
+            FinalAppraisal, 
+            TricksOfTheTrade, 
+            // Manipulation
+        });
+
+        public ICollection<Action> WithManipulation = new ReadOnlyCollection<Action>(new[]
+        {
+            Manipulation
+        });
     }
 }

@@ -27,6 +27,7 @@ namespace FfxivMacroCalculator.CraftingSystem
         public ConditionState Condition = ConditionState.Normal;
         public readonly Dictionary<Effect, int> Effects = new();
 
+        public CraftState() { }
         public CraftState(int N, double P, double Q, int E, int Z, int I, ConditionState H, Dictionary<Effect, int> L)
         {
             CraftStep = N;

@@ -17,24 +17,17 @@
 
     public class SetSimulateResult
     {
-        public double SuccessRate { get; } = 0;
+        public double FailedRate { get; } = 0;
         public StateSet PossibleStates { get; } = new();
 
         public SetSimulateResult(double successRate, StateSet states)
         {
-            SuccessRate = successRate;
+            FailedRate = successRate;
             PossibleStates = states;
         }
 
     }
 
-    public class RecipeGoal
-    {
-        public int Progress;
-        public int Quality;
-        public int Durability;
-        public int CraftingPoints;
-    }
 
     public static class Simulator
     {

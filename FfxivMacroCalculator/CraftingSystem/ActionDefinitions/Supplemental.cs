@@ -118,7 +118,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }),
         };
 
-        public static Action GreateStrides = new()
+        public static Action GreatStrides = new()
         {
             ActionKey = "阔步", 
             LeastLevel = 21,
