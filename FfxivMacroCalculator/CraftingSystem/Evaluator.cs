@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FfxivMacroCalculator.ProductionSystem
+namespace FfxivMacroCalculator.CraftingSystem
 {
-    public partial class Effect
+    public static class Evaluator
     {
-        private Effect() { }
+
 
 
     }

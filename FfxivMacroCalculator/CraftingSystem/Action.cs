@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FfxivMacroCalculator.ProductionSystem
+namespace FfxivMacroCalculator.CraftingSystem
 {
     public enum ActionEffect
     {

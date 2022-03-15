@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FfxivMacroCalculator.ProductionSystem
+namespace FfxivMacroCalculator.CraftingSystem
 {
-    public static class Evaluator
+    public partial class Effect
     {
+        private Effect() { }
+
 
     }
 }

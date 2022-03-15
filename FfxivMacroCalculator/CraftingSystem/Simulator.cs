@@ -1,15 +1,15 @@
-﻿namespace FfxivMacroCalculator.ProductionSystem
+﻿namespace FfxivMacroCalculator.CraftingSystem
 {
     using System.Collections.ObjectModel;
     using StateSet = List<(double, CraftState)>;
     public class SimulateResult
     {
-        public bool Succeed { get; } = false;
+        public bool Succeeded { get; } = false;
         public StateSet PossibleStates { get; } = new();
 
-        public SimulateResult(bool succeed, StateSet states)
+        public SimulateResult(bool succ, StateSet states)
         {
-            Succeed = succeed;
+            Succeeded = succ;
             PossibleStates = states;
         }
 
@@ -30,10 +30,10 @@
 
     public class RecipeGoal
     {
-        public int GP;
-        public int GQ;
-        public int GE;
-        public int GZ;
+        public int Progress;
+        public int Quality;
+        public int Durability;
+        public int CraftingPoints;
     }
 
     public static class Simulator
@@ -114,9 +114,9 @@
 
             // judge if the state is halting
             var flag2 = true;
-            if (state.Durability >= goal.GE ||
-                state.Progress >= goal.GP ||
-                state.CraftingPoints + opr.DCraftPoints >= goal.GZ)
+            if (state.Durability >= goal.Durability ||
+                state.Progress >= goal.Progress ||
+                state.CraftingPoints + opr.DCraftPoints >= goal.CraftingPoints)
                 flag2 = false;
 
             flag = flag && flag2;
@@ -144,7 +144,7 @@
             // element mark related is removed
 
             if (opr.Contains(ActionEffect.Effect50pIfNotEnoughDurability))
-                if (opr.DDurability * eRate + state.Durability > goal.GE)
+                if (opr.DDurability * eRate + state.Durability > goal.Durability)
                     pRate *= 0.5;
 
             double sRate = opr.SuccessRate;
@@ -181,7 +181,7 @@
                 !opr.Contains(ActionEffect.NoCraftStep) &&
                 !opr.Contains(Effect.DurabilityAdd5))
             {
-                if (E < goal.GE)
+                if (E < goal.Durability)
                     E -= 5;
             }
 
@@ -207,9 +207,9 @@
             }
 
             var L_ = new Dictionary<Effect, int>(L);
-            if (L_.ContainsKey(Effect.DoNotComplete) && P_ > goal.GP)
+            if (L_.ContainsKey(Effect.DoNotComplete) && P_ > goal.Progress)
             {
-                P_ = goal.GP - 1;
+                P_ = goal.Progress - 1;
                 L_.Remove(Effect.DoNotComplete);
             }
             if (L_.ContainsKey(Effect.Process200pForOnce) && opr.DProgress > 0)
@@ -279,7 +279,7 @@
             {
                 var simRes = state.Simulate(opr, goal, r, hqRateDict);
                 ans.AddRange(simRes.PossibleStates);
-                if (!simRes.Succeed)
+                if (!simRes.Succeeded)
                     ++failedCount;
             }
             if (ans.Count > maxCount)
