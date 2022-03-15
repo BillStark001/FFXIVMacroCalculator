@@ -28,6 +28,14 @@
 
     }
 
+    public class RecipeGoal
+    {
+        public int Progress;
+        public int Quality;
+        public int Durability;
+        public int CraftingPoints;
+    }
+
 
     public static class Simulator
     {

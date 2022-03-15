@@ -69,7 +69,7 @@ namespace FfxivMacroCalculator.CraftingSystem
 
         // generate sets
 
-        public ICollection<Action> General = new ReadOnlyCollection<Action>( new[] 
+        public static ICollection<Action> General = new ReadOnlyCollection<Action>( new[] 
         {
             BasicSynthesis, 
             BasicSynthesis2, 
@@ -109,7 +109,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             // Manipulation
         });
 
-        public ICollection<Action> WithManipulation = new ReadOnlyCollection<Action>(new[]
+        public static ICollection<Action> WithManipulation = new ReadOnlyCollection<Action>(new[]
         {
             Manipulation
         });

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Solver\" />
+    <Folder Include="Solver\Genetic\" />
   </ItemGroup>
 
   <ItemGroup>

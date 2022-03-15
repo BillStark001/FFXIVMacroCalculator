@@ -46,14 +46,14 @@ namespace FfxivMacroCalculator
 
         public void AddRow(params object?[] objs)
         {
-            _rows.Add(objs.Select(x => x.ToString() ?? "").ToList());
+            _rows.Add(objs.Select(x => (x ?? "").ToString() ?? "").ToList());
             if (objs.Length >= _columnCount)
                 _columnCount = objs.Length;
         }
 
         public void AddRow(IEnumerable<object?> objs)
         {
-            _rows.Add(objs.Select(x => x.ToString() ?? "").ToList());
+            _rows.Add(objs.Select(x => (x ?? "").ToString() ?? "").ToList());
             if (objs.Count() >= _columnCount)
                 _columnCount = objs.Count();
         }
