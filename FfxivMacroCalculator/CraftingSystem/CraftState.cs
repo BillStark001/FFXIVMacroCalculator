@@ -81,5 +81,22 @@ namespace FfxivMacroCalculator.CraftingSystem
             }
             return ret;
         }
+
+        public static CraftState Average(IEnumerable<CraftState> states)
+        {
+            CraftState avg = new();
+            var l = states.Count();
+            foreach (var state in states)
+            {
+                avg.CraftStep = Math.Max(avg.CraftStep, state.CraftStep);
+                avg.Progress += state.Progress / l;
+                avg.Quality += state.Quality / l;
+                avg.Durability = Math.Max(avg.Durability, state.Durability);
+                avg.CraftingPoints = Math.Max(avg.CraftingPoints, state.CraftingPoints);
+                avg.InnerQuiet += state.InnerQuiet;
+            }
+            avg.InnerQuiet /= l;
+            return avg;
+        }
     }
 }

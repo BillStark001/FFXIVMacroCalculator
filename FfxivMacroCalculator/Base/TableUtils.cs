@@ -130,7 +130,7 @@ namespace FfxivMacroCalculator
 
         public static int GetConsolasOutputLength(char chr)
         {
-            return Encoding.Default.GetBytes(new[] { chr }).Length == 1 ? 1 : 2;
+            return (short)chr > 0x2fff ? 2 : 1;
         }
         public static int GetConsolasOutputLength(string str)
         {

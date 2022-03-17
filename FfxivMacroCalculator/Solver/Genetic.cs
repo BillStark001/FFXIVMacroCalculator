@@ -96,7 +96,6 @@ namespace FfxivMacroCalculator.Solver
             foreach (var action in agent.Content)
             {
                 var simRes = Simulator.SimulateSet(action, sim, goal, maxCount: maxSampleCount, hqRateDict: hqRateDict);
-                // Console.WriteLine(simRes);
                 sim = simRes.PossibleStates;
                 if (simRes.FailedRate > t_fr)
                     ++loss_fr;
@@ -109,7 +108,6 @@ namespace FfxivMacroCalculator.Solver
                 var l = loss(res.Progress, res.Quality, res.Durability, res.CraftingPoints);
                 ans1 += srate;
                 ans2 += srate * l;
-                // Console.WriteLine($"{srate}, {l}, {res}");
             }
             ans2 /= ans1;
             ans2 -= loss_fr * 0.01;
@@ -242,7 +240,6 @@ namespace FfxivMacroCalculator.Solver
                         Args.MutateRate);
                     Population.Add((agent, EvaluateAgent(agent, Args.Goal, Args.SampleRate, Loss, Args.HqRateDict, Args.FailedRateThreshold)));
                 }
-
                 SelectPopulation();
             }
 

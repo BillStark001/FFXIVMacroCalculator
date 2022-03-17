@@ -23,11 +23,17 @@ var argsGA = new Genetic.Arguments()
     Goal = goal,
 };
 
-var context = new Genetic.Context(actions, argsGA);
-var pop = Genetic.PopulationDump.Dump(context);
-File.WriteAllText("./iter0.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
 
-for (int _ = 0; _ < 321; _++)
+// var context = new Genetic.Context(actions, argsGA);
+// var pop = Genetic.PopulationDump.Dump(context);
+// File.WriteAllText("./iter0.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
+
+
+var pop = JsonConvert.DeserializeObject<Genetic.PopulationDump>(File.ReadAllText("./iter640.json"))!;
+var context = new Genetic.Context(actions, argsGA);
+context.Population = pop.Recover(actions);
+
+for (int _ = 0; _ < 961; _++)
 {
     context.Reproduce();
     if (_ % 10 == 0)
@@ -35,5 +41,5 @@ for (int _ = 0; _ < 321; _++)
 }
 
 pop = Genetic.PopulationDump.Dump(context);
-File.WriteAllText("./iter320.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
+File.WriteAllText("./iter1600.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
 

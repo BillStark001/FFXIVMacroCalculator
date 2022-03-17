@@ -2,6 +2,7 @@
 {
     using System.Collections.ObjectModel;
     using StateSet = List<(double, CraftState)>;
+    using EStateSet = IEnumerable<(double, CraftState)>;
     public record SimulateResult
     {
         public bool Succeeded { get; } = false;
@@ -36,8 +37,9 @@
         public static readonly int MaxInnerQuiet = 10; // TODO 6.0 modification, need check
 
         // TODO re-measure it
-        public static readonly IList<double> InnerStaticRate = new List<double>()
+        public static readonly IList<double> InnerQuietState55 = new List<double>()
         {
+             1.0,
              1.0,
              1.2388804146556174,
              1.4932383207358164,
@@ -50,6 +52,10 @@
              3.698682193485718,
              4.074395546853657
         }.AsReadOnly();
+
+        public static readonly IList<double> InnerQuietState60 = new List<double>(
+            Enumerable.Range(0, MaxInnerQuiet + 1).Select(x => 1 + x * 0.1)
+            ).AsReadOnly();
 
         public static readonly IDictionary<ConditionState, double> HQDict =
             new ReadOnlyDictionary<ConditionState, double>(new Dictionary<ConditionState, double>()
@@ -84,7 +90,8 @@
             Action opr,
             RecipeGoal goal,
             double totalRate = 1,
-            IDictionary<ConditionState, double>? hqRateDict = null)
+            IDictionary<ConditionState, double>? hqRateDict = null, 
+            StateSet? qualityAdded = null)
         {
             if (opr.LeastLevel <= 0)
                 throw new InvalidDataException();
@@ -93,46 +100,51 @@
 
             // judge if operation is legal
 
-            var flag = true;
-            if (opr.Contains(ActionEffect.OnlyFirstStep) && state.CraftStep > 0)
-                flag = false;
-            if (opr.Contains(ActionEffect.OnlyGoodCondition) && state.QualityBelow(ConditionState.Good))
-                flag = false;
-            // element mark related skills are removed in v6.0
-            if (opr.Contains(ActionEffect.OnlyNotInWasteNot) && state.ContainsState(Effect.Durability50p))
-                flag = false;
-            if (opr.Contains(ActionEffect.OnlyInInnerQuiet) && state.InnerQuiet == 0)
-                flag = false;
-            if (opr.Contains(ActionEffect.OnlyInMaxInnerQuiet) && state.InnerQuiet == MaxInnerQuiet)
-                flag = false;
+            var illegalFlag = false;
+            if (
+                (opr.Contains(ActionEffect.OnlyFirstStep) && state.CraftStep > 0) ||
+                (opr.Contains(ActionEffect.OnlyGoodCondition) && state.QualityBelow(ConditionState.Good)) ||
+                (opr.Contains(ActionEffect.OnlyNotInWasteNot) && state.ContainsState(Effect.Durability50p)) ||
+                (opr.Contains(ActionEffect.OnlyInInnerQuiet) && state.InnerQuiet == 0) ||
+                (opr.Contains(ActionEffect.OnlyInMaxInnerQuiet) && state.InnerQuiet == MaxInnerQuiet)
+               )
+                illegalFlag = true;
 
             // judge if the state is halting
-            var flag2 = true;
+            var haltFlag = false;
             if (state.Durability >= goal.Durability ||
                 state.Progress >= goal.Progress ||
                 state.CraftingPoints + opr.DCraftPoints >= goal.CraftingPoints)
-                flag2 = false;
+                haltFlag = true;
 
-            flag = flag && flag2;
-
-            if (!flag)
+            if (illegalFlag || haltFlag)
+            {
+                if (qualityAdded != null)
+                {
+                    qualityAdded.Add((totalRate, state));
+                    return new(false, qualityAdded);
+                }
                 return new(false, new() { (totalRate, state) });
+            }
+                
 
             // calculate p q e s
             double pRate = 1;
             double qRate = 1;
             double eRate = 1;
+            double sRate = opr.SuccessRate;
 
             if (opr.Contains(ActionEffect.DQualityAdd20ByInnerQuiet))
-                qRate += 0.2 * (state.InnerQuiet); 
+                qRate += 0.2 * (state.InnerQuiet);
 
             if (state.ContainsState(Effect.Process200pForOnce)) pRate += 1;
             if (state.ContainsState(Effect.Quality200pForOnce)) qRate += 1;
             if (state.ContainsState(Effect.Process150p)) pRate += 0.5;
             if (state.ContainsState(Effect.Quality150p)) qRate += 0.5;
+
             if (state.ContainsState(Effect.Durability50p)) eRate -= 0.5;
 
-            qRate *= InnerStaticRate[state.InnerQuiet];
+            qRate *= InnerQuietState60[state.InnerQuiet];
             qRate *= HQDict[state.Condition];
 
             // element mark related is removed
@@ -141,7 +153,6 @@
                 if (opr.DDurability * eRate + state.Durability > goal.Durability)
                     pRate *= 0.5;
 
-            double sRate = opr.SuccessRate;
             if (opr.Contains(ActionEffect.MustSuccessAfterObserve))
                 if (state.ContainsState(Effect.AfterObservation))
                     sRate = 1;
@@ -229,7 +240,8 @@
 
             // divide H
 
-            StateSet qualityAdded = new();
+            // if another list is assigned, use it
+            qualityAdded = qualityAdded ?? new();
             foreach (var (a, b) in diverged)
             {
                 if (a <= DiscardThreshold)
@@ -251,7 +263,7 @@
             }
 
             // update L by operation
-            return new(flag, qualityAdded);
+            return new(true, qualityAdded);
         }
 
         public static SetSimulateResult SimulateSet(
@@ -266,16 +278,17 @@
             if (hqRateDict == null)
                 hqRateDict = HQRateDictReal;
 
-            StateSet ans = new();
+            StateSet ans = new(4);
             int failedCount = 0;
 
-            foreach (var (r, state) in seq)
+            for (int i = 0; i < seq.Count; ++i)
             {
-                var simRes = state.Simulate(opr, goal, r, hqRateDict);
-                ans.AddRange(simRes.PossibleStates);
+                var (r, state) = seq[i];
+                var simRes = state.Simulate(opr, goal, r, hqRateDict, qualityAdded: ans);
                 if (!simRes.Succeeded)
                     ++failedCount;
             }
+
             if (ans.Count > maxCount)
             {
                 int i = 0;
