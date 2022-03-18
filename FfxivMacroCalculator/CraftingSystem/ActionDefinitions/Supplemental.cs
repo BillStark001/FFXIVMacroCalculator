@@ -72,6 +72,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DCraftPoints = 56,
             DDurability = 0,
             DInnerQuiet = 0,
+            WaitSecond = 2,
             TimedEffects = new REI(new DEI()
             {
                 [Effect.Durability50p] = 4
@@ -88,6 +89,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DCraftPoints = 98,
             DDurability = 0,
             DInnerQuiet = 0,
+            WaitSecond = 2,
             TimedEffects = new REI(new DEI()
             {
                 [Effect.Durability50p] = 8
@@ -100,6 +102,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             LeastLevel = 26,
             SuccessRate = 1.0,
             DCraftPoints = 18,
+            WaitSecond = 2, 
             TimedEffects = new REI(new DEI()
             {
                 [Effect.Quality150p] = 4
@@ -112,6 +115,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             LeastLevel = 15,
             SuccessRate = 1.0,
             DCraftPoints = 18,
+            WaitSecond = 2,
             TimedEffects = new REI(new DEI()
             {
                 [Effect.Process150p] = 4
@@ -128,6 +132,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DCraftPoints = 32,
             DDurability = 0,
             DInnerQuiet = 0,
+            WaitSecond = 2,
             TimedEffects = new REI(new DEI()
             {
                 [Effect.Quality200pForOnce] = 3
@@ -204,6 +209,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             DCraftPoints = 96,
             DDurability = 0,
             DInnerQuiet = 0,
+            WaitSecond = 2,
             TimedEffects = new REI(new DEI()
             {
                 [Effect.DurabilityAdd5] = 8

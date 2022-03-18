@@ -294,7 +294,8 @@ namespace FfxivMacroCalculator.CraftingSystem
             {
                 int i = 0;
                 double accRate = 0;
-                foreach (var x in ans.ChooseWithProbability(maxCount, x => x.Item1))
+                var prob = ans.ChooseWithProbability(maxCount, x => x.Item1);
+                foreach (var x in prob)
                 {
                     accRate += x.Item1;
                     ans[i++] = x;
@@ -303,7 +304,7 @@ namespace FfxivMacroCalculator.CraftingSystem
             }
 
             return new(
-                failedCount / seq.Count,
+                (double)failedCount / seq.Count,
                 ans
                 );
         }

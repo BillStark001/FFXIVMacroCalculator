@@ -187,6 +187,11 @@ namespace FfxivMacroCalculator
             for (int _ = 0; _ < count; ++_)
                 sb.Append(' ');
         }
+        
+        public static string ToPercentage(this double d, int radix = 2)
+        {
+            return (d * 100).ToString($"N{(radix > 0 ? radix : 0)}") + "%";
+        }
 
         public static int PutString(StringBuilder target, string str, int startIndex, int length, Table.Option option)
         {

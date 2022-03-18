@@ -56,7 +56,7 @@ namespace FfxivMacroCalculator
                 if (accRate[searchRes] > target)
                     searchRes = Math.Max(high, 0);
 
-                ans.Append(elements.ElementAt(searchRes));
+                ans.Add(elements.ElementAt(searchRes));
             }
             return ans;
         }

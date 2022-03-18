@@ -49,6 +49,8 @@ namespace FfxivMacroCalculator.CraftingSystem
         public int DDurability { get; private set; } = 0;
         public int DInnerQuiet { get; private set; } = 0;
 
+        public int WaitSecond { get; private set; } = 3;
+
         public ActionEffect Effects { get; private set; } = ActionEffect.None;
 
         public IDictionary<Effect, int> TimedEffects { get; private set; } 
@@ -70,7 +72,6 @@ namespace FfxivMacroCalculator.CraftingSystem
         {
             return $"Action({ActionKey})";
         }
-
 
         // generate sets
 

@@ -46,5 +46,8 @@ pop = Genetic.PopulationDump.Dump(context);
 File.WriteAllText("./iter1600.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
 */
 
-var table = Evaluator.Evaluate2(context.Population[0].Item1, goal, (double) recipe.DProgress / 100, (double) recipe.DQuality / 100, 100, Simulator.HQRateDictPlain);
+Console.WriteLine(context.Population[0].Item1);
+Console.WriteLine(context.Population[0].Item1.StripFailedActions(goal, hqRateDict: Simulator.HQRateDictPlain));
+
+var table = Evaluator.Evaluate2(context.Population[0].Item1, goal, (double) recipe.DProgress / 100, (double) recipe.DQuality / 100, 10000, Simulator.HQRateDictPlain);
 Console.WriteLine(table.ToString(12));

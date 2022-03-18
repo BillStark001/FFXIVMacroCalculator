@@ -11,7 +11,7 @@ namespace FfxivMacroCalculator.CraftingSystem
     public static class Evaluator
     {
 
-        public static List<(CraftState, double, int)> Evaluate(
+        public static (List<(CraftState, double, int)>, double) Evaluate(
             Macro m,
             RecipeGoal g,
             double progressMult = 1, 
@@ -29,7 +29,12 @@ namespace FfxivMacroCalculator.CraftingSystem
                 records.Add((CraftState.Average(res.PossibleStates), res.FailedRate, s.Count));
                 s = res.PossibleStates;
             }
-            return records;
+            double sr = 0;
+            foreach (var (rate, state) in s)
+            {
+                if (state.Progress >= g.Progress) sr += rate;
+            }
+            return (records, 1 - sr);
         } 
 
         public static Table Evaluate2(
@@ -48,11 +53,11 @@ namespace FfxivMacroCalculator.CraftingSystem
                 "Quality", 
                 "Durability", 
                 "CP", 
-                "Failed Rate", 
+                "Success Rate", 
                 "Sampling Number"
                 );
 
-            var records = Evaluate(m, g, progressMult, qualityMult, maxCount, hqRateDict);  
+            var (records, totalFr) = Evaluate(m, g, progressMult, qualityMult, maxCount, hqRateDict);  
             for (int i = 0; i < records.Count; ++i)
             {
                 var (state, fr, sn) = records[i];
@@ -63,7 +68,7 @@ namespace FfxivMacroCalculator.CraftingSystem
                     state.Quality * qualityMult,
                     g.Durability - state.Durability,
                     g.CraftingPoints - state.CraftingPoints,
-                    i == 0 ? "N/A" : fr,
+                    i == 0 ? "N/A" : (1 - fr).ToPercentage(),
                     sn
                     );
             }
@@ -75,8 +80,7 @@ namespace FfxivMacroCalculator.CraftingSystem
                 g.Quality * qualityMult,
                 g.Durability, 
                 g.CraftingPoints, 
-                records.Last().Item1.Progress >= g.Progress ? 
-                "Success" : "Fail", 
+                (1 - totalFr).ToPercentage(),
                 "N/A"
                 );
 
