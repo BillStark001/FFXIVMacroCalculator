@@ -46,14 +46,14 @@ namespace FfxivMacroCalculator
 
         public void AddRow(params object?[] objs)
         {
-            _rows.Add(objs.Select(x => (x ?? "").ToString() ?? "").ToList());
+            _rows.Add(objs.Select(x => TableUtils.ToPrettierString(x)).ToList());
             if (objs.Length >= _columnCount)
                 _columnCount = objs.Length;
         }
 
         public void AddRow(IEnumerable<object?> objs)
         {
-            _rows.Add(objs.Select(x => (x ?? "").ToString() ?? "").ToList());
+            _rows.Add(objs.Select(x => TableUtils.ToPrettierString(x)).ToList());
             if (objs.Count() >= _columnCount)
                 _columnCount = objs.Count();
         }
@@ -72,7 +72,7 @@ namespace FfxivMacroCalculator
                     SetColumnName(_columnCount, key);
                     index = _columnCount - 1;
                 }
-                r[index] = (value ?? "").ToString() ?? "";
+                r[index] = TableUtils.ToPrettierString(value);
             }
         }
 
@@ -89,14 +89,20 @@ namespace FfxivMacroCalculator
             return ret.ToString();
         }
 
-        public string ToString(uint maxRowcharCount, uint minRowCharCount = 0)
+        public string ToString(int maxRowcharCount, int minRowCharCount = 0, Option option = Option.CentralAligned)
         {
+            if (maxRowcharCount < 1)
+                maxRowcharCount = 1;
+            if (minRowCharCount > maxRowcharCount)
+                minRowCharCount = maxRowcharCount;
+
             StringBuilder ret = new();
-            int[] columnWidth = new int[_columnCount];
-            int[] rowHeight = new int[_rows.Count + 1];
             string[] headers = new string[_columnCount];
             for (int i = 0; i < _columnCount; ++i)
                 headers[i] = _headerDict2.TryGetValue(i, out var h) ? h : $"#COLUMN: {i}#";
+
+            // calculate column width
+            int[] columnWidth = new int[_columnCount];
             int r = 0;
             foreach (var row in new List<IEnumerable<string>>() { headers }.Concat(_rows))
             {
@@ -105,22 +111,134 @@ namespace FfxivMacroCalculator
                 {
                     // (r, c)
                     var l = TableUtils.GetConsolasOutputLength(cell);
-                    var ld = l / (int) maxRowcharCount;
-                    var lr = l % (int) maxRowcharCount;
-                    rowHeight[r] = Math.Max(rowHeight[r], ld + 1);
-                    columnWidth[r] = Math.Max(columnWidth[r], ld > 0 ? (int)maxRowcharCount : Math.Max(lr, (int)minRowCharCount));
+                    columnWidth[c] = Math.Max(columnWidth[c], l);
                     ++c;
                 }
                 ++r;
             }
+            for (int i = 0; i < _columnCount; ++i)
+                columnWidth[i] = Math.Max(Math.Min(columnWidth[i], maxRowcharCount), minRowCharCount);
+
+            // upper frame
+            ret.Append('\u250c');
+            for (int i = 0; i < _columnCount; ++i)
+            {
+                for (int _ = 0; _ < columnWidth[i]; ++_)
+                    ret.Append('\u2500');
+                if (i != _columnCount - 1)
+                    ret.Append('\u252c');
+            }
+            ret.AppendLine("\u2510");
+            // header & rows
+            var isFirst = false;
+            foreach (var row in new List<IEnumerable<string>>() { headers }.Concat(_rows))
+            {
+                int[] pointer = new int[Math.Min(row.Count(), _columnCount)];
+                bool needNext = true;
+                while (needNext)
+                {
+                    needNext = false;
+                    ret.Append('\u2502');
+                    for (int i = 0; i < pointer.Length; ++i)
+                    {
+                        pointer[i] = TableUtils.PutString(ret, row.ElementAt(i), pointer[i], columnWidth[i], option);
+                        if (pointer[i] < row.ElementAt(i).Length)
+                            needNext = true;
+                        ret.Append('\u2502');
+                    }
+                    ret.AppendLine();
+                }
+                if (!isFirst)
+                {
+                    isFirst = true;
+                    ret.Append('\u251c');
+                    for (int i = 0; i < _columnCount; ++i)
+                    {
+                        for (int _ = 0; _ < columnWidth[i]; ++_)
+                            ret.Append('\u2500');
+                        if (i != _columnCount - 1)
+                            ret.Append('\u253c');
+                    }
+                    ret.AppendLine("\u2524");
+                }
+            }
+
+            // lower frame
+            ret.Append('\u2514');
+            for (int i = 0; i < _columnCount; ++i)
+            {
+                for (int _ = 0; _ < columnWidth[i]; ++_)
+                    ret.Append('\u2500');
+                if (i != _columnCount - 1)
+                    ret.Append('\u2534');
+            }
+            ret.AppendLine("\u2518");
+
             // TODO!!!!
-            
+
             return ret.ToString();
         }
     }
 
     public static class TableUtils
     {
+        public static void AppendSpace(this StringBuilder sb, int count)
+        {
+            for (int _ = 0; _ < count; ++_)
+                sb.Append(' ');
+        }
+
+        public static int PutString(StringBuilder target, string str, int startIndex, int length, Table.Option option)
+        {
+            int charToPut = 0;
+            int ret = str.Length;
+            for (int i = startIndex; i < str.Length; ++i)
+            {
+                var l = GetConsolasOutputLength(str[i]);
+                if (charToPut + l > length)
+                {
+                    ret = i;
+                    break;
+                }
+                else
+                    charToPut += l;
+            }
+            var substr = str.Substring(startIndex, ret - startIndex);
+            switch (option)
+            {
+                case Table.Option.LeftAligned:
+                    target.Append(substr);
+                    target.AppendSpace(length - charToPut);
+                    break;
+                case Table.Option.RightAligned:
+                    target.AppendSpace(length - charToPut);
+                    target.Append(substr);
+                    break;
+                case Table.Option.CentralAligned:
+                    int mid = (length - charToPut) / 2;
+                    target.AppendSpace(mid);
+                    target.Append(substr);
+                    target.AppendSpace(length - charToPut - mid);
+                    break;
+            }
+            return ret;
+        }
+
+        public static string ToPrettierString(this object? obj)
+        {
+            if (obj == null)
+                return "null";
+            else
+            {
+                if (obj is float f)
+                    return f.ToString("0.000");
+                else if (obj is double d)
+                    return d.ToString("0.000");
+                else
+                    return obj.ToString() ?? "";
+            }
+        }
+
         public static string CsvEncode(this string str)
         {
             if (str.Contains(','))
@@ -130,7 +248,7 @@ namespace FfxivMacroCalculator
 
         public static int GetConsolasOutputLength(char chr)
         {
-            return (short)chr > 0x2fff ? 2 : 1;
+            return (int)chr > 0x2fff ? 2 : 1;
         }
         public static int GetConsolasOutputLength(string str)
         {

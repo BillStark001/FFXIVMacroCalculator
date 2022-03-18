@@ -54,7 +54,7 @@ namespace FfxivMacroCalculator
                 if (searchRes == -1)
                     searchRes = mid; // need check
                 if (accRate[searchRes] > target)
-                    throw new NotImplementedException();
+                    searchRes = Math.Max(high, 0);
 
                 ans.Append(elements.ElementAt(searchRes));
             }

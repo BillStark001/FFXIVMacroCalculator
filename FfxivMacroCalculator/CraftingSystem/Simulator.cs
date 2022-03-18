@@ -1,8 +1,9 @@
-﻿namespace FfxivMacroCalculator.CraftingSystem
+﻿using System.Collections.ObjectModel;
+
+namespace FfxivMacroCalculator.CraftingSystem
 {
-    using System.Collections.ObjectModel;
     using StateSet = List<(double, CraftState)>;
-    using EStateSet = IEnumerable<(double, CraftState)>;
+
     public record SimulateResult
     {
         public bool Succeeded { get; } = false;

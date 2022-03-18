@@ -15,6 +15,8 @@ var recipe = JsonConvert.DeserializeObject<RecipeInfo>(File.ReadAllText(recipeDi
 var food = JsonConvert.DeserializeObject<FoodInfo>(File.ReadAllText(foodDir))!;
 
 var goal = RecipeGoal.Create(player, recipe, new() { [food.Name] = food });
+Console.WriteLine(player);
+Console.WriteLine(recipe);
 Console.WriteLine(goal);
 var actions = player.GetActionSet();
 
@@ -28,12 +30,12 @@ var argsGA = new Genetic.Arguments()
 // var pop = Genetic.PopulationDump.Dump(context);
 // File.WriteAllText("./iter0.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
 
-
-var pop = JsonConvert.DeserializeObject<Genetic.PopulationDump>(File.ReadAllText("./iter640.json"))!;
+var pop = JsonConvert.DeserializeObject<Genetic.PopulationDump>(File.ReadAllText("./iter1600.json"))!;
 var context = new Genetic.Context(actions, argsGA);
 context.Population = pop.Recover(actions);
 
-for (int _ = 0; _ < 961; _++)
+/*
+for (int _ = 0; _ < 1601; _++)
 {
     context.Reproduce();
     if (_ % 10 == 0)
@@ -42,4 +44,7 @@ for (int _ = 0; _ < 961; _++)
 
 pop = Genetic.PopulationDump.Dump(context);
 File.WriteAllText("./iter1600.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
+*/
 
+var table = Evaluator.Evaluate2(context.Population[0].Item1, goal, (double) recipe.DProgress / 100, (double) recipe.DQuality / 100, 100, Simulator.HQRateDictPlain);
+Console.WriteLine(table.ToString(12));

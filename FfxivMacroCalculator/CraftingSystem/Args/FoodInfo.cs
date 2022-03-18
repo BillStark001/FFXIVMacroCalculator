@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FfxivMacroCalculator.CraftingSystem.Args
 {
-    public class FoodInfo
+    public record FoodInfo
     {
         public string Name = "";
         public string Description = "";

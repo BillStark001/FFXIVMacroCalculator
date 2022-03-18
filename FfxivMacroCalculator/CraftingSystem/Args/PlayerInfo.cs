@@ -8,7 +8,7 @@ using Action = FfxivMacroCalculator.CraftingSystem.Action;
 
 namespace FfxivMacroCalculator.CraftingSystem.Args
 {
-    public class PlayerInfo
+    public record PlayerInfo
     {
         public string Name = "";
         public string Description = "";
