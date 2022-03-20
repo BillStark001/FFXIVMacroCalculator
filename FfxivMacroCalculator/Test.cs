@@ -4,8 +4,6 @@ using FfxivMacroCalculator.CraftingSystem.Args;
 using FfxivMacroCalculator.Solver;
 using Newtonsoft.Json;
 
-Console.WriteLine("Hello, World!");
-
 var playerDir = "./player.json";
 var recipeDir = "./recipe.json";
 var foodDir = "./food.json";
@@ -26,15 +24,17 @@ var argsGA = new Genetic.Arguments()
 };
 
 
-// var context = new Genetic.Context(actions, argsGA);
-// var pop = Genetic.PopulationDump.Dump(context);
-// File.WriteAllText("./iter0.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
+// Console.WriteLine(string.Join('\n', new PlayerInfo() { Level = 90, Manipulation = true }.GetActionSet().Select(x => x.ActionKey)));
 
-var pop = JsonConvert.DeserializeObject<Genetic.PopulationDump>(File.ReadAllText("./iter1600.json"))!;
 var context = new Genetic.Context(actions, argsGA);
-context.Population = pop.Recover(actions);
+var pop = Genetic.PopulationDump.Dump(context);
+File.WriteAllText("./iter0.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
 
-/*
+// var pop = JsonConvert.DeserializeObject<Genetic.PopulationDump>(File.ReadAllText("./iter1600.json"))!;
+// var context = new Genetic.Context(actions, argsGA);
+// context.Population = pop.Recover(actions);
+
+
 for (int _ = 0; _ < 1601; _++)
 {
     context.Reproduce();
@@ -44,7 +44,7 @@ for (int _ = 0; _ < 1601; _++)
 
 pop = Genetic.PopulationDump.Dump(context);
 File.WriteAllText("./iter1600.json", JsonConvert.SerializeObject(pop, Formatting.Indented));
-*/
+
 
 Console.WriteLine(context.Population[0].Item1);
 Console.WriteLine(context.Population[0].Item1.StripFailedActions(goal, hqRateDict: Simulator.HQRateDictPlain));

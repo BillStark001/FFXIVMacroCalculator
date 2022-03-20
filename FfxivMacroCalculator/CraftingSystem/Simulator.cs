@@ -107,7 +107,7 @@ namespace FfxivMacroCalculator.CraftingSystem
                 (opr.Contains(ActionEffect.OnlyGoodCondition) && state.QualityBelow(ConditionState.Good)) ||
                 (opr.Contains(ActionEffect.OnlyNotInWasteNot) && state.ContainsState(Effect.Durability50p)) ||
                 (opr.Contains(ActionEffect.OnlyInInnerQuiet) && state.InnerQuiet == 0) ||
-                (opr.Contains(ActionEffect.OnlyInMaxInnerQuiet) && state.InnerQuiet == MaxInnerQuiet)
+                (opr.Contains(ActionEffect.OnlyInMaxInnerQuiet) && state.InnerQuiet != MaxInnerQuiet)
                )
                 illegalFlag = true;
 

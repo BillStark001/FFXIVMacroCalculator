@@ -80,7 +80,6 @@ namespace FfxivMacroCalculator.CraftingSystem
             BasicSynthesis,
             BasicSynthesis2,
 
-            IntensiveSynthesis,
             CarefulSynthesis,
             CarefulSynthesis2,
 
@@ -92,8 +91,6 @@ namespace FfxivMacroCalculator.CraftingSystem
             BasicTouch,
             StandardTouch,
             AdvancedTouch,
-
-            PreciseTouch,
             
             PreparatoryTouch,
             PrudentTouch,
@@ -108,14 +105,23 @@ namespace FfxivMacroCalculator.CraftingSystem
             Veneration,
             GreatStrides,
             MastersMend,
-            Observe,
+            
             FinalAppraisal,
-            TricksOfTheTrade, 
+            
             // Manipulation
+        }.AsReadOnly();
+
+        public static ICollection<Action> OnlyGoodCondition => new List<Action>()
+        {
+            IntensiveSynthesis,
+            PreciseTouch,
+            TricksOfTheTrade,
         }.AsReadOnly();
 
         public static ICollection<Action> Not100pSuccess => new List<Action>()
         {
+            Observe,
+
             RapidSynthesis,
             RapidSynthesis2,
             FocusedSynthesis,
