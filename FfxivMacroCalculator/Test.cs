@@ -21,10 +21,11 @@ var actions = player.GetActionSet();
 var argsGA = new Genetic.Arguments()
 {
     Goal = goal,
+    MacroLength = 28, 
 };
 
+// genetic
 
-// Console.WriteLine(string.Join('\n', new PlayerInfo() { Level = 90, Manipulation = true }.GetActionSet().Select(x => x.ActionKey)));
 
 var context = new Genetic.Context(actions, argsGA);
 var pop = Genetic.PopulationDump.Dump(context);
@@ -33,7 +34,6 @@ File.WriteAllText("./iter0.json", JsonConvert.SerializeObject(pop, Formatting.In
 // var pop = JsonConvert.DeserializeObject<Genetic.PopulationDump>(File.ReadAllText("./iter1600.json"))!;
 // var context = new Genetic.Context(actions, argsGA);
 // context.Population = pop.Recover(actions);
-
 
 for (int _ = 0; _ < 1601; _++)
 {
@@ -51,3 +51,14 @@ Console.WriteLine(context.Population[0].Item1.StripFailedActions(goal, hqRateDic
 
 var table = Evaluator.Evaluate2(context.Population[0].Item1, goal, (double) recipe.DProgress / 100, (double) recipe.DQuality / 100, 10000, Simulator.HQRateDictPlain);
 Console.WriteLine(table.ToString(12));
+
+
+
+// tree
+/*
+var content = new TreeSearchContent()
+{
+    Goal = goal, 
+};
+content.Search(new(), new());
+*/

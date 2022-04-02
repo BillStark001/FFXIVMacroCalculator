@@ -86,21 +86,12 @@ namespace FfxivMacroCalculator.CraftingSystem
             });
 
         //  = (0, 0.65, 0.25, 0.1)
-        public static SimulateResult Simulate(
+
+        public static bool CanApply(
             this CraftState state,
             Action opr,
-            RecipeGoal goal,
-            double totalRate = 1,
-            IDictionary<ConditionState, double>? hqRateDict = null, 
-            StateSet? qualityAdded = null)
+            RecipeGoal goal)
         {
-            if (opr.LeastLevel <= 0)
-                throw new InvalidDataException();
-            if (hqRateDict == null)
-                hqRateDict = HQRateDictReal;
-
-            // judge if operation is legal
-
             var illegalFlag = false;
             if (
                 (opr.Contains(ActionEffect.OnlyFirstStep) && state.CraftStep > 0) ||
@@ -118,7 +109,20 @@ namespace FfxivMacroCalculator.CraftingSystem
                 state.CraftingPoints + opr.DCraftPoints >= goal.CraftingPoints)
                 haltFlag = true;
 
-            if (illegalFlag || haltFlag)
+            return !(illegalFlag || haltFlag);
+        }
+
+
+        public static SimulateResult Simulate(
+            this CraftState state,
+            Action opr,
+            RecipeGoal goal,
+            double totalRate = 1,
+            IDictionary<ConditionState, double>? hqRateDict = null,
+            StateSet? qualityAdded = null)
+        {
+            var flag = !CanApply(state, opr, goal);
+            if (flag)
             {
                 if (qualityAdded != null)
                 {
@@ -127,7 +131,22 @@ namespace FfxivMacroCalculator.CraftingSystem
                 }
                 return new(false, new() { (totalRate, state) });
             }
-                
+
+            return ForceSimulate(state, opr, goal, totalRate, hqRateDict, qualityAdded);
+        }
+
+        public static SimulateResult ForceSimulate(
+            this CraftState state,
+            Action opr,
+            RecipeGoal goal,
+            double totalRate = 1,
+            IDictionary<ConditionState, double>? hqRateDict = null, 
+            StateSet? qualityAdded = null)
+        {
+            if (opr.LeastLevel <= 0)
+                throw new InvalidDataException();
+            if (hqRateDict == null)
+                hqRateDict = HQRateDictReal;
 
             // calculate p q e s
             double pRate = 1;

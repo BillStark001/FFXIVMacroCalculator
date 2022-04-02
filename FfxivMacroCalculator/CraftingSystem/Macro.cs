@@ -43,7 +43,7 @@ namespace FfxivMacroCalculator.CraftingSystem
                     sb.AppendLine("-------------------------------");
                     foreach (var action in Content.Skip((currentMacro - 1) * 14).Take(14))
                         sb.AppendLine(Format(action));
-                    sb.AppendLine($"/e \"Macro #{currentMacro} Completed.\"");
+                    sb.AppendLine($"/e Macro #{currentMacro} Completed. <se.1>");
                     sb.AppendLine("-------------------------------");
                     ++currentMacro;
                 }

@@ -29,6 +29,28 @@ namespace FfxivMacroCalculator.CraftingSystem
 
         public CraftState() { }
 
+        public bool AbsolutelyBetterThan(CraftState s)
+        {
+            if (Utils.DictionaryEquals(s.Effects, Effects))
+            {
+                return
+                    !(this.Progress < s.Progress || Quality < s.Quality || Durability > s.Durability || CraftingPoints > s.CraftingPoints || InnerQuiet < s.InnerQuiet)
+                    && (this.Progress > s.Progress || Quality > s.Quality || Durability < s.Durability || CraftingPoints < s.CraftingPoints || InnerQuiet > s.InnerQuiet);
+            }
+            return false;
+        }
+
+        public static bool StateEquals(CraftState s1, CraftState s2)
+        {
+            return
+                s1.Progress == s2.Progress &&
+                s1.Quality == s2.Quality &&
+                s1.Durability == s2.Durability &&
+                s1.CraftingPoints == s2.CraftingPoints &&
+                s1.InnerQuiet == s2.InnerQuiet &&
+                Utils.DictionaryEquals(s1.Effects, s2.Effects);
+        }
+
         public CraftState(int N, double P, double Q, int E, int Z, int I, ConditionState H, Dictionary<Effect, int> L)
         {
             CraftStep = N;

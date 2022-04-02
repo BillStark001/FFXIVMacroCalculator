@@ -60,5 +60,17 @@ namespace FfxivMacroCalculator
             }
             return ans;
         }
+
+        public static bool DictionaryEquals<K, V>(IDictionary<K, V> d1, IDictionary<K, V> d2)
+        {
+            if (d1.Count != d2.Count)
+                return false;
+            foreach (var (k1, v1) in d1)
+            {
+                if (!d2.TryGetValue(k1, out var v2) || !object.Equals(v1, v2))
+                    return false;
+            }
+            return true;
+        }
     }
 }

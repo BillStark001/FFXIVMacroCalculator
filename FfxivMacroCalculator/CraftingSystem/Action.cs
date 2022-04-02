@@ -75,7 +75,7 @@ namespace FfxivMacroCalculator.CraftingSystem
 
         // generate sets
 
-        public static ICollection<Action> General => new List<Action>()
+        public static ICollection<Action> Synthesis => new List<Action>()
         {
             BasicSynthesis,
             BasicSynthesis2,
@@ -88,12 +88,21 @@ namespace FfxivMacroCalculator.CraftingSystem
             DelicateSynthesis,
             PrudentSynthesis,
 
+        }.AsReadOnly();
+
+        public static ICollection<Action> Touch => new List<Action>()
+        {
             BasicTouch,
             StandardTouch,
             AdvancedTouch,
-            
+
             PreparatoryTouch,
             PrudentTouch,
+
+        }.AsReadOnly();
+
+        public static ICollection<Action> Supplymental => new List<Action>()
+        {
             TrainedFinesse,
 
             MuscleMemory,
@@ -109,6 +118,16 @@ namespace FfxivMacroCalculator.CraftingSystem
             FinalAppraisal,
             
             // Manipulation
+        }.AsReadOnly();
+
+        public static ICollection<Action> General =>
+            Synthesis.Concat(Touch).Concat(Supplymental)
+            .ToList().AsReadOnly();
+
+        public static ICollection<Action> Initial => new List<Action>()
+        {
+            MuscleMemory,
+            Reflect,
         }.AsReadOnly();
 
         public static ICollection<Action> OnlyGoodCondition => new List<Action>()
